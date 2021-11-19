@@ -34,7 +34,7 @@ Also, you should have some spare cash in the account to pay for rollup costs (ro
 
 If you want to prohibit this, you can set the "rollCalendar" setting in the config to True
 
-Know that this option when used constantly will decline your returns more and more, as the asset climbs higher and the premium of that option falls
+Know that this option when used constantly will decline your returns more and more, as the asset climbs higher and the extrinsic value of that option falls
 
 
 

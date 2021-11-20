@@ -5,6 +5,7 @@ import json
 
 
 class Api:
+    client = None
     tokenPath = ''
     apiKey = ''
     apiRedirectUri = ''
@@ -16,21 +17,27 @@ class Api:
 
     def connect(self):
         try:
-            c = auth.client_from_token_file(self.tokenPath, self.apiKey)
+            self.client = auth.client_from_token_file(self.tokenPath, self.apiKey)
         except FileNotFoundError:
             from selenium import webdriver
             with webdriver.Chrome(ChromeDriverManager().install()) as driver:
-                c = auth.client_from_login_flow(
+                self.client = auth.client_from_login_flow(
                     driver, self.apiKey, self.apiRedirectUri, self.tokenPath)
 
-        # r = c.get_price_history('AAPL',
-        #                         period_type=client.Client.PriceHistory.PeriodType.YEAR,
-        #                         period=client.Client.PriceHistory.Period.TEN_YEARS,
-        #                         frequency_type=client.Client.PriceHistory.FrequencyType.DAILY,
-        #                         frequency=client.Client.PriceHistory.Frequency.DAILY)
-        # assert r.status_code == 200, r.raise_for_status()
-        # print(json.dumps(r.json(), indent=4))
+    def getATMPrice(self, asset):
+        # client can be None
+        r = self.client.get_quote(asset)
 
-    def getATMPrice(self):
-        # todo api
-        return 150
+        assert r.status_code == 200, r.raise_for_status()
+
+        data = r.json()
+        lastPrice = 0
+
+        try:
+            lastPrice = data[asset]['lastPrice']
+        except KeyError:
+            # todo better exception handling
+            print('wrong data from api')
+            exit(1)
+
+        return lastPrice

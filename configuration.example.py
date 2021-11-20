@@ -2,7 +2,7 @@ apiKey = ''
 apiRedirectUri = ''
 
 configuration = {
-    'qqq': {
+    'QQQ': {
         # how many cc's to write
         'amountOfHundreds': 1,
 

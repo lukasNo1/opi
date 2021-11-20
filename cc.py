@@ -4,7 +4,6 @@ from configuration import apiRedirectUri
 from optionChain import OptionChain
 from api import Api
 from statistics import median
-import sys
 
 
 class Cc:
@@ -17,6 +16,8 @@ class Cc:
         allowedDaysRange = configuration[asset]['days'] + configuration[asset]['daysSpread']
 
         api = Api(apiKey, apiRedirectUri)
+        api.connect()
+
         optionChain = OptionChain(api, asset, allowedDaysRange)
 
         chain = optionChain.get()
@@ -37,9 +38,12 @@ class Cc:
             # todo strike of last option, fail if it doesnt have one
             strikePrice = 0
         else:
-            strikePrice = api.getATMPrice() + configuration[asset]['minGapToATM']
+            strikePrice = api.getATMPrice(asset) + configuration[asset]['minGapToATM']
 
         contract = optionChain.getContractFromDateChain(strikePrice, closestChain['contracts'])
+
+        # todo maybe make a setting with max allowed strike difference from calculated strikePrice
+        # only a problem on an asset with very few options
 
         # check minYield
         projectedPremium = median([contract['bid'], contract['ask']])
@@ -56,6 +60,8 @@ class Cc:
 
 def writeCcs():
     for asset in configuration:
+        asset = asset.upper()
+
         cc = Cc(asset).find()
 
         print('The bot wants to write the following contract:')
@@ -71,4 +77,4 @@ def writeCc(cc):
 def writingCcFailed(message):
     # todo throw according to writeRequirementsNotMetAlert
     print(message)
-    sys.exit(1)
+    exit(1)

@@ -1,14 +1,12 @@
 # OPI - Option passive income bot
 
-
 **IN DEVELOPMENT!!!**
 
-## Preface
+## General warnings
 
-Do not use this bot without understanding the risks behind it. You can lose all your money!
+If you want to use this bot you should know a thing or two about the stock market and especially options.
 
 If you don't understand what's written here or what the code of this bot does, then dont use it!
-
 
 ## Factsheet
 
@@ -35,19 +33,6 @@ Also, you should have some spare cash in the account to pay for rollup costs (ro
 If you want to prohibit this, you can set the "rollCalendar" setting in the config to True
 
 Know that this option when used constantly will decline your returns more and more, as the asset climbs higher and the extrinsic value of that option falls
-
-
-
-### Risks
-
-Volatility risk - Less volatility, more spread, less option premium
-
-Do not use this bot with assets that have low volatility or too few options
-
-General risks with stocks and options
-
-If you want to use this bot you should know about the risks investing in the stock market and especially options.
-
 
 ### Configuration
 
@@ -77,4 +62,16 @@ If you want to use this bot you should know about the risks investing in the sto
     'writeRequirementsNotMetAlert': None
 
 
+### Hardcoded rules
 
+- Options with expiration dates below 3 days out are not allowed and will be handled according to the `writeRequirementsNotMetAlert` setting
+    - So `days` - `daysSpread` must always amount to 3 or more for the bot to work
+- ITM call options are only possible with `rollCalendar` enabled
+
+### Risks
+
+**Volatility risk** - Less volatility, more spread, less option premium
+
+Do not use this bot with assets that have low volatility or too few options
+
+**Options** - Covered calls are the least risky options, nonetheless, if you don't know what you're doing or fuck up the configuration above, you can lose a lot or even all of your money

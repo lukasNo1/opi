@@ -53,22 +53,26 @@ If you want to use this bot you should know about the risks investing in the sto
 
     # how many cc's to write
     'amountOfHundreds': 1,
-    
+
     # only buy cc's at or over current asset price + this value
     'minGapToATM': 1,
-    
+
+    # don't write cc's with strikes below this value
+    # if this is ITM, ATM price gets used instead
+    'minStrike': 0,
+
     # write cc's around this far out, bot gets the nearest contract possible
-    'days': 30,
-    
+    'days': 31,
+
     # allow x days less or more
     'daysSpread': 10,
-    
+
     # only write that cc if you can get this value or above in premium
     'minYield': 300,
-    
-    # if we need to roll, only roll calendar (OVERWRITES minGapToATM and minYield!!!)
+
+    # if we need to roll, only roll calendar (OVERWRITES minGapToATM, minStrike and minYield!!!)
     'rollCalendar': False,
-    
+
     # None, email ### what should happen if the bot can't find a cc with the given configuration to write
     'writeRequirementsNotMetAlert': None
 

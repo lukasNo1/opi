@@ -9,6 +9,10 @@ configuration = {
         # only buy cc's at or over current asset price + this value
         'minGapToATM': 1,
 
+        # don't write cc's with strikes below this value
+        # if this is ITM, ATM price gets used instead
+        'minStrike': 0,
+
         # write cc's around this far out, bot gets the nearest contract possible
         'days': 31,
 
@@ -18,7 +22,7 @@ configuration = {
         # only write that cc if you can get this value or above in premium
         'minYield': 300,
 
-        # if we need to roll, only roll calendar (OVERWRITES minGapToATM and minYield!!!)
+        # if we need to roll, only roll calendar (OVERWRITES minGapToATM, minStrike and minYield!!!)
         'rollCalendar': False,
 
         # None, email ### what should happen if the bot can't find a cc with the given configuration to write

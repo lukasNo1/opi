@@ -17,7 +17,7 @@ class Cc:
         api = Api(apiKey, apiRedirectUri)
         api.connect()
 
-        optionChain = OptionChain(api, asset,  configuration[asset]['days'], configuration[asset]['daysSpread'])
+        optionChain = OptionChain(api, asset, configuration[asset]['days'], configuration[asset]['daysSpread'])
 
         chain = optionChain.get()
         # todo handle no chain found
@@ -35,14 +35,21 @@ class Cc:
         #  get the best matching contract
         if configuration[asset]['rollCalendar']:
             # todo strike of last option, fail if it doesnt have one
+            atmPrice = 0
             strikePrice = 0
         else:
-            strikePrice = api.getATMPrice(asset) + configuration[asset]['minGapToATM']
+            atmPrice = api.getATMPrice(asset)
+            strikePrice = atmPrice + configuration[asset]['minGapToATM']
 
         contract = optionChain.getContractFromDateChain(strikePrice, closestChain['contracts'])
 
-        # todo maybe make a setting with max allowed strike difference from calculated strikePrice
-        # only a problem on an asset with very few options
+        minStrike = configuration[asset]['minStrike']
+
+        if minStrike < atmPrice:
+            minStrike = atmPrice
+
+        if not configuration[asset]['rollCalendar'] and contract['strike'] < minStrike:
+            return writingCcFailed('minStrike')
 
         # check minYield
         projectedPremium = median([contract['bid'], contract['ask']]) * 100
@@ -72,6 +79,7 @@ def writeCcs():
 def writeCc(cc):
     # todo api
     return True
+
 
 def writingCcFailed(message):
     # todo throw according to writeRequirementsNotMetAlert

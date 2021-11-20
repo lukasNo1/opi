@@ -1,40 +1,52 @@
+import json
+
+
 class OptionChain:
     strikes = 24
 
-    def __init__(self, api, asset, daysOut):
+    def __init__(self, api, asset, days, daysSpread):
         self.api = api
         self.asset = asset
-        self.daysOut = daysOut
+        self.days = days
+        self.daysSpread = daysSpread
 
     def get(self):
-        # todo api
-        return [
-            {
-                'days': 28,
-                'contracts': [
+        apiData = self.api.getOptionChain(self.asset, self.strikes, self.days, self.daysSpread)
+
+        return self.mapApiData(apiData)
+
+    def mapApiData(self, data):
+        # convert api response to data the application can read
+        map = []
+
+        try:
+            tmp = data['callExpDateMap']
+            for key, value in tmp.items():
+                days = int(key.split(':')[1])
+                contracts = []
+
+                for contractKey, contractValue in value.items():
+                    contracts.extend([
+                        {
+                            'strike': contractValue[0]['strikePrice'],
+                            'bid': contractValue[0]['bid'],
+                            'ask': contractValue[0]['ask'],
+                        }
+                    ])
+
+                map.extend([
                     {
-                        'strike': 150,
-                        'bid': 100,
-                        'ask': 101
+                        'days': days,
+                        'contracts': contracts
                     }
-                ]
-            },
-            {
-                'days': 31,
-                'contracts': [
-                    {
-                        'strike': 150,
-                        'bid': 100,
-                        'ask': 101
-                    },
-                    {
-                        'strike': 151,
-                        'bid': 300,
-                        'ask': 301
-                    }
-                ]
-            }
-        ]
+                ])
+
+        except KeyError:
+            # todo better exception handling
+            print('wrong data from api')
+            exit(1)
+
+        return map
 
     def getContractFromDateChain(self, strike, chain):
         return min(chain, key=lambda x: abs(x['strike'] - strike))

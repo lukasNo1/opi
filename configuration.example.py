@@ -10,7 +10,7 @@ configuration = {
         'minGapToATM': 1,
 
         # write cc's around this far out, bot gets the nearest contract possible
-        'days': 30,
+        'days': 31,
 
         # allow x days less or more
         'daysSpread': 10,

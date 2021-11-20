@@ -13,12 +13,11 @@ class Cc:
 
     def find(self):
         asset = self.asset
-        allowedDaysRange = configuration[asset]['days'] + configuration[asset]['daysSpread']
 
         api = Api(apiKey, apiRedirectUri)
         api.connect()
 
-        optionChain = OptionChain(api, asset, allowedDaysRange)
+        optionChain = OptionChain(api, asset,  configuration[asset]['days'], configuration[asset]['daysSpread'])
 
         chain = optionChain.get()
         # todo handle no chain found
@@ -46,7 +45,7 @@ class Cc:
         # only a problem on an asset with very few options
 
         # check minYield
-        projectedPremium = median([contract['bid'], contract['ask']])
+        projectedPremium = median([contract['bid'], contract['ask']]) * 100
 
         if not configuration[asset]['rollCalendar'] and projectedPremium < configuration[asset]['minYield']:
             return writingCcFailed('minYield')

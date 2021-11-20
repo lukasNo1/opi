@@ -25,7 +25,9 @@ class Cc:
         # get closest chain to days
         closestChain = min(chain, key=lambda x: abs(x['days'] - configuration[asset]['days']))
 
-        dateTooClose = abs(closestChain['days'] - configuration[asset]['days']) < -configuration[asset]['daysSpread']
+        # note: if the days or days - daysSpread in configuration amount to less than 3, date will always be too close
+        # (with daysSpread only if it round down instead of up to get the best contract)
+        dateTooClose = closestChain['days'] < 3 or abs(closestChain['days'] - configuration[asset]['days']) < -configuration[asset]['daysSpread']
         dateTooFaar = abs(closestChain['days'] - configuration[asset]['days']) > configuration[asset]['daysSpread']
 
         # check if its within the spread

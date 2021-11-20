@@ -1,3 +1,6 @@
+apiKey = ''
+apiRedirectUri = ''
+
 configuration = {
     'qqq': {
         # how many cc's to write

@@ -1,6 +1,8 @@
 apiKey = ''
 apiRedirectUri = ''
 
+dbName = 'db.json'
+
 configuration = {
     'QQQ': {
         # how many cc's to write

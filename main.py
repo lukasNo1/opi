@@ -1,10 +1,12 @@
-from cc import writeCcs
+from cc import writeCcs, writeCc
+import time
 
-from configuration import apiKey
-from configuration import apiRedirectUri
-from api import Api
+starttime = time.time()
 
-# todo
-# infinite loop, check written contracts if we need to sell them
+# writeCc('QQQ',{'contract':'QQQ123'})
 
-writeCcs()
+while True:
+    writeCcs()
+
+    time.sleep(60.0 - ((time.time() - starttime) % 60.0))
+

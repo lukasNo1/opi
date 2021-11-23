@@ -1,5 +1,3 @@
-import json
-
 
 class OptionChain:
     strikes = 24
@@ -22,12 +20,17 @@ class OptionChain:
         try:
             tmp = data['callExpDateMap']
             for key, value in tmp.items():
-                days = int(key.split(':')[1])
+                split = key.split(':')
+
+                date = split[0]
+                days = int(split[1])
+
                 contracts = []
 
                 for contractKey, contractValue in value.items():
                     contracts.extend([
                         {
+                            'symbol': contractValue[0]['symbol'],
                             'strike': contractValue[0]['strikePrice'],
                             'bid': contractValue[0]['bid'],
                             'ask': contractValue[0]['ask'],
@@ -36,6 +39,7 @@ class OptionChain:
 
                 map.extend([
                     {
+                        'date': date,
                         'days': days,
                         'contracts': contracts
                     }

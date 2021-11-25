@@ -3,6 +3,7 @@ from optionChain import OptionChain
 from api import Api
 from statistics import median
 from tinydb import TinyDB, Query
+import datetime
 
 
 class Cc:
@@ -98,8 +99,11 @@ def writeCcs():
 
 
 def needsRolling(cc):
-    # todo
-    return True
+    # needs rolling on date BEFORE expiration (if the market is closed, it will trigger ON expiration date)
+    daysOffset = 1
+    nowPlusOffset = (datetime.datetime.utcnow() + datetime.timedelta(days=daysOffset)).strftime('%Y-%m-%d')
+
+    return nowPlusOffset >= cc['expiration']
 
 
 def writeCc(asset, cc):
@@ -113,7 +117,7 @@ def writeCc(asset, cc):
         'optionSymbol': cc['contract']['symbol'],
         'expiration': cc['date'],
         'count': -1,
-        'strike':  cc['contract']['strike'],
+        'strike': cc['contract']['strike'],
         'receivedPremium': 0
     }
 

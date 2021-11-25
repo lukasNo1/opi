@@ -21,7 +21,7 @@ class OptionChain:
             for key, value in tmp.items():
                 split = key.split(':')
 
-                date = split[0]
+                date = split[0]  # todo ensure yyyy-mm-dd
                 days = int(split[1])
 
                 contracts = []

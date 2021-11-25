@@ -29,29 +29,32 @@ class Cc:
         dateTooClose = closestChain['days'] < 3 or abs(closestChain['days'] - configuration[asset]['days']) < -configuration[asset]['daysSpread']
         dateTooFaar = abs(closestChain['days'] - configuration[asset]['days']) > configuration[asset]['daysSpread']
 
+        minStrike = configuration[asset]['minStrike']
+        atmPrice = 0
+
         # check if its within the spread
         if dateTooClose or dateTooFaar:
             return writingCcFailed('days range')
 
         #  get the best matching contract
         if configuration[asset]['rollCalendar']:
-            # todo strike of last option, fail if it doesnt have one
-            atmPrice = 0
-            strikePrice = 0
+            if not existing:
+                return writingCcFailed('roll calendar selected but no option to roll')
+
+            # this technically allows a strike greater than the current one if none other available, which wouldn't be a calendar roll
+            # this can be bad on a chain with few options, but we have to roll something, can't let it expire
+            minStrike = existing['strike']
+            strikePrice = existing['strike']
         else:
             atmPrice = api.getATMPrice(asset)
             strikePrice = atmPrice + configuration[asset]['minGapToATM']
 
-        # todo get closest contract ABOVE strikePrice instead of closest value above or below
+            if minStrike < atmPrice:
+                minStrike = atmPrice
+
         contract = optionChain.getContractFromDateChain(strikePrice, closestChain['contracts'])
 
-        minStrike = configuration[asset]['minStrike']
-
-        # todo if we have a option we are rolling, use the options price as minStrike
-        if minStrike < atmPrice:
-            minStrike = atmPrice
-
-        if not configuration[asset]['rollCalendar'] and contract['strike'] < minStrike:
+        if not contract or (not configuration[asset]['rollCalendar'] and contract['strike'] < minStrike):
             return writingCcFailed('minStrike')
 
         # check minYield
@@ -110,6 +113,7 @@ def writeCc(asset, cc):
         'optionSymbol': cc['contract']['symbol'],
         'expiration': cc['date'],
         'count': -1,
+        'strike':  cc['contract']['strike'],
         'receivedPremium': 0
     }
 

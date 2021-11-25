@@ -1,4 +1,3 @@
-
 class OptionChain:
     strikes = 24
 
@@ -53,4 +52,12 @@ class OptionChain:
         return map
 
     def getContractFromDateChain(self, strike, chain):
-        return min(chain, key=lambda x: abs(x['strike'] - strike))
+        # ensure this is sorted by strike
+        chain = sorted(chain, key=lambda d: d['strike'])
+
+        # get first contract at or above strike
+        for contract in chain:
+            if contract['strike'] >= strike:
+                return contract
+
+        return None

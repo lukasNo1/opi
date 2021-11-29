@@ -1,6 +1,5 @@
-from configuration import configuration, apiKey, apiRedirectUri, dbName
+from configuration import configuration, dbName
 from optionChain import OptionChain
-from api import Api
 from statistics import median
 from tinydb import TinyDB, Query
 import datetime
@@ -11,11 +10,8 @@ class Cc:
     def __init__(self, asset):
         self.asset = asset
 
-    def findNew(self, existing):
+    def findNew(self, api, existing):
         asset = self.asset
-
-        api = Api(apiKey, apiRedirectUri)
-        api.connect()
 
         optionChain = OptionChain(api, asset, configuration[asset]['days'], configuration[asset]['daysSpread'])
 
@@ -78,7 +74,7 @@ class Cc:
         return db.search(Query().stockSymbol == self.asset)
 
 
-def writeCcs():
+def writeCcs(api):
     for asset in configuration:
         asset = asset.upper()
         cc = Cc(asset)
@@ -89,11 +85,12 @@ def writeCcs():
             existing = None
 
         if (existing and needsRolling(existing)) or not existing:
-            new = cc.findNew(existing)
+            new = cc.findNew(api, existing)
 
             print('The bot wants to write the following contract:')
             print(new)
-            writeCc(asset, new)
+
+            writeCc(api, asset, new, existing)
         else:
             print('Nothing to write ...')
 
@@ -106,18 +103,18 @@ def needsRolling(cc):
     return nowPlusOffset >= cc['expiration']
 
 
-def writeCc(asset, cc):
-    # todo api
+def writeCc(api, asset, new, existing):
+    # todo api, roll if existing, else just normal order
     # Client.place_order(account_id, order_spec)
     # tda.utils.Utils.extract_order_id()
     # Client.get_order(order_id, account_id)
 
     soldOption = {
         'stockSymbol': asset,
-        'optionSymbol': cc['contract']['symbol'],
-        'expiration': cc['date'],
+        'optionSymbol': new['contract']['symbol'],
+        'expiration': new['date'],
         'count': -1,
-        'strike': cc['contract']['strike'],
+        'strike': new['contract']['strike'],
         'receivedPremium': 0
     }
 

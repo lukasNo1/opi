@@ -69,24 +69,26 @@ class Api:
 
         return r.json()
 
-    def isEquityRegularMarketOpen(self):
+    def isOptionMarketOpen(self):
         date = datetime.datetime.utcnow()
-        r = self.connectClient.get_hours_for_single_market(tda.client.Client.Markets.EQUITY, date)
+        date = date.replace(tzinfo=datetime.timezone.utc)
+
+        r = self.connectClient.get_hours_for_single_market(tda.client.Client.Markets.OPTION, date)
 
         assert r.status_code == 200, r.raise_for_status()
 
         data = r.json()
 
-        try:
-            start = data['equity']['EQ']['sessionHours']['regularMarket'][0]['start']
-            end = data['equity']['EQ']['sessionHours']['regularMarket'][0]['end']
+        # try:
+        start = data['option']['EQO']['sessionHours']['regularMarket'][0]['start']
+        end = data['option']['EQO']['sessionHours']['regularMarket'][0]['end']
 
-            start = datetime.datetime.fromisoformat(start)
-            end = datetime.datetime.fromisoformat(end)
+        start = datetime.datetime.fromisoformat(start)
+        end = datetime.datetime.fromisoformat(end)
 
-            if start <= date <= end:
-                return True
-            else:
-                return False
-        except (KeyError, TypeError, ValueError):
+        if start <= date <= end:
+            return True
+        else:
             return False
+        # except (KeyError, TypeError, ValueError):
+        #     return False

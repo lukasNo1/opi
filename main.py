@@ -10,13 +10,13 @@ api = Api(apiKey, apiRedirectUri)
 
 while True:
     api.connect()
-    # todo maybe outside of loop & reconnect function
+    # todo notify if fails and needs manual input
 
-    marketOpen = api.isEquityRegularMarketOpen()
+    marketOpen = api.isOptionMarketOpen()
 
     if marketOpen:
         writeCcs(api)
     else:
-        print('Nothing to write ...')
+        print('Market closed. Nothing to write ...')
 
     time.sleep(60.0 - ((time.time() - starttime) % 60.0))

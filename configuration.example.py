@@ -1,5 +1,6 @@
 apiKey = ''
 apiRedirectUri = ''
+ameritradeAccountId = ''
 
 dbName = 'db.json'
 
@@ -31,3 +32,9 @@ configuration = {
         'writeRequirementsNotMetAlert': None
     }
 }
+
+
+
+# don't touch these
+debugMarketOpen = False
+debugEverythingNeedsRolling = False

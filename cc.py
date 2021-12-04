@@ -1,4 +1,4 @@
-from configuration import configuration, dbName
+from configuration import configuration, dbName, debugEverythingNeedsRolling
 from optionChain import OptionChain
 from statistics import median
 from tinydb import TinyDB, Query
@@ -90,12 +90,17 @@ def writeCcs(api):
             print('The bot wants to write the following contract:')
             print(new)
 
-            writeCc(api, asset, new, existing)
+            existingPremium = api.getATMPrice(existing['optionSymbol'])
+
+            writeCc(api, asset, new, existing, existingPremium)
         else:
             print('Nothing to write ...')
 
 
 def needsRolling(cc):
+    if debugEverythingNeedsRolling:
+        return True
+
     # needs rolling on date BEFORE expiration (if the market is closed, it will trigger ON expiration date)
     daysOffset = 1
     nowPlusOffset = (datetime.datetime.utcnow() + datetime.timedelta(days=daysOffset)).strftime('%Y-%m-%d')
@@ -103,11 +108,26 @@ def needsRolling(cc):
     return nowPlusOffset >= cc['expiration']
 
 
-def writeCc(api, asset, new, existing):
-    # todo api, roll if existing, else just normal order
-    # Client.place_order(account_id, order_spec)
-    # tda.utils.Utils.extract_order_id()
-    # Client.get_order(order_id, account_id)
+def writeCc(api, asset, new, existing, existingPremium):
+    if existing and existingPremium:
+        api.writeNewContracts(
+            existing['optionSymbol'],
+            new['contract']['symbol'],
+            1,
+            existingPremium,
+            new['projectedPremium']
+        )
+    else:
+        api.writeNewContracts(
+            None,
+            new['contract']['symbol'],
+            1,
+            0,
+            new['projectedPremium']
+        )
+
+    # todo check if order was successful
+
 
     soldOption = {
         'stockSymbol': asset,

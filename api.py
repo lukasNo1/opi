@@ -1,8 +1,9 @@
 import os
 import tda
 from webdriver_manager.chrome import ChromeDriverManager
-import json
+from configuration import ameritradeAccountId
 import datetime
+from statistics import median
 
 
 class Api:
@@ -35,7 +36,10 @@ class Api:
         lastPrice = 0
 
         try:
-            lastPrice = data[asset]['lastPrice']
+            if data[asset]['assetType'] == 'OPTION':
+                lastPrice = median([data[asset]['bidPrice'], data[asset]['askPrice']]) * 100
+            else:
+                lastPrice = data[asset]['lastPrice']
         except KeyError:
             # todo better exception handling
             print('wrong data from api')
@@ -79,16 +83,38 @@ class Api:
 
         data = r.json()
 
-        # try:
-        start = data['option']['EQO']['sessionHours']['regularMarket'][0]['start']
-        end = data['option']['EQO']['sessionHours']['regularMarket'][0]['end']
+        try:
+            start = data['option']['EQO']['sessionHours']['regularMarket'][0]['start']
+            end = data['option']['EQO']['sessionHours']['regularMarket'][0]['end']
 
-        start = datetime.datetime.fromisoformat(start)
-        end = datetime.datetime.fromisoformat(end)
+            start = datetime.datetime.fromisoformat(start)
+            end = datetime.datetime.fromisoformat(end)
 
-        if start <= date <= end:
-            return True
-        else:
+            if start <= date <= end:
+                return True
+            else:
+                return False
+        except (KeyError, TypeError, ValueError):
             return False
-        # except (KeyError, TypeError, ValueError):
-        #     return False
+
+    def writeNewContracts(self, oldSymbol, newSymbol, amount, oldDebit, newCredit):
+        if oldSymbol is None:
+            # init a new position, buy to open
+            order = tda.orders.options.option_buy_to_open_limit(newSymbol, amount, newCredit) \
+                .set_duration(tda.orders.common.Duration.DAY) \
+                .set_session(tda.orders.common.Session.NORMAL)
+        else:
+            # roll
+            order = tda.orders.generic.OrderBuilder()
+
+            order.set_complex_order_strategy_type(tda.orders.common.ComplexOrderStrategyType.DIAGONAL) \
+                .add_option_leg(tda.orders.common.OptionInstruction.BUY_TO_CLOSE, oldSymbol, amount) \
+                .add_option_leg(tda.orders.common.OptionInstruction.SELL_TO_OPEN, newSymbol, amount) \
+                .set_duration(tda.orders.common.Duration.DAY) \
+                .set_session(tda.orders.common.Session.NORMAL) \
+                .set_price(oldDebit - newCredit)
+
+        print(order.build())
+        exit()
+        # todo uncomment this
+        # self.connectClient.place_order(ameritradeAccountId, order)

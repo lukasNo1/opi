@@ -1,5 +1,6 @@
 import os
 import tda
+from tda.utils import Utils
 from webdriver_manager.chrome import ChromeDriverManager
 from configuration import ameritradeAccountId
 import datetime
@@ -99,12 +100,14 @@ class Api:
 
     def writeNewContracts(self, oldSymbol, newSymbol, amount, oldDebit, newCredit):
         if oldSymbol is None:
+            price = newCredit
             # init a new position, buy to open
-            order = tda.orders.options.option_buy_to_open_limit(newSymbol, amount, newCredit) \
+            order = tda.orders.options.option_buy_to_open_limit(newSymbol, amount, price) \
                 .set_duration(tda.orders.common.Duration.DAY) \
                 .set_session(tda.orders.common.Session.NORMAL)
         else:
             # roll
+            price = oldDebit - newCredit
             order = tda.orders.generic.OrderBuilder()
 
             order.set_complex_order_strategy_type(tda.orders.common.ComplexOrderStrategyType.DIAGONAL) \
@@ -112,9 +115,40 @@ class Api:
                 .add_option_leg(tda.orders.common.OptionInstruction.SELL_TO_OPEN, newSymbol, amount) \
                 .set_duration(tda.orders.common.Duration.DAY) \
                 .set_session(tda.orders.common.Session.NORMAL) \
-                .set_price(oldDebit - newCredit)
+                .set_price(price)
 
         print(order.build())
         exit()
         # todo uncomment this
-        # self.connectClient.place_order(ameritradeAccountId, order)
+        # r = self.connectClient.place_order(ameritradeAccountId, order)
+        #
+        # assert r.status_code == 200, r.raise_for_status()
+        # order_id = Utils(self.connectClient, ameritradeAccountId).extract_order_id(r)
+        # assert order_id is not None
+        #
+        # return order_id
+
+    def checkOrder(self, orderId):
+        r = self.connectClient.get_order(orderId, ameritradeAccountId)
+
+        assert r.status_code == 200, r.raise_for_status()
+
+        data = r.json()
+
+        try:
+            filled = data['status'] == 'FILLED'
+            price = data['price']
+        except (KeyError):
+            filled = False
+            price = 0
+
+        return {
+            'filled': filled,
+            'price': price
+        }
+
+    def cancelOrder(self, orderId):
+        r = self.connectClient.cancel_order(orderId, ameritradeAccountId)
+
+        # throws error if cant cancel (code 400 - 404)
+        assert r.status_code == 200, r.raise_for_status()

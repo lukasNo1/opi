@@ -3,6 +3,7 @@ from optionChain import OptionChain
 from statistics import median
 from tinydb import TinyDB, Query
 import datetime
+import time
 
 
 class Cc:
@@ -110,7 +111,7 @@ def needsRolling(cc):
 
 def writeCc(api, asset, new, existing, existingPremium):
     if existing and existingPremium:
-        api.writeNewContracts(
+        orderId = api.writeNewContracts(
             existing['optionSymbol'],
             new['contract']['symbol'],
             1,
@@ -118,7 +119,7 @@ def writeCc(api, asset, new, existing, existingPremium):
             new['projectedPremium']
         )
     else:
-        api.writeNewContracts(
+        orderId = api.writeNewContracts(
             None,
             new['contract']['symbol'],
             1,
@@ -126,8 +127,26 @@ def writeCc(api, asset, new, existing, existingPremium):
             new['projectedPremium']
         )
 
-    # todo check if order was successful
+    checkedOrder = api.checkOrder(orderId)
 
+    if not checkedOrder['filled']:
+        for x in range(12):
+            # try to fill it for 12 * 5 seconds
+            print('Waiting for order to be filled ...')
+
+            checkedOrder = api.checkOrder(orderId)
+
+            if checkedOrder['filled']:
+                print('Order has been filled!')
+                break
+
+            time.sleep(5)
+
+    if not checkedOrder['filled']:
+        api.cancelOrder(orderId)
+
+        # todo maybe lower the price instead of just failing
+        return writingCcFailed('order cant be filled')
 
     soldOption = {
         'stockSymbol': asset,
@@ -135,13 +154,11 @@ def writeCc(api, asset, new, existing, existingPremium):
         'expiration': new['date'],
         'count': -1,
         'strike': new['contract']['strike'],
-        'receivedPremium': 0
+        'receivedPremium': checkedOrder['price']
     }
 
-    # todo refactor
     db = TinyDB(dbName)
 
-    # todo remove/update only if roll
     db.remove(Query().stockSymbol == asset)
     db.insert(soldOption)
 

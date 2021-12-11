@@ -69,7 +69,6 @@ class Cc:
         }
 
     def existing(self):
-        # todo refactor
         db = TinyDB(dbName)
 
         return db.search(Query().stockSymbol == self.asset)
@@ -111,36 +110,38 @@ def needsRolling(cc):
 
 def writeCc(api, asset, new, existing, existingPremium):
     if existing and existingPremium:
+        # we use the db count here to prevent buying back more than we must if the amount in the configuration has changed
+        amountToBuyBack = existing['count']
+
         orderId = api.writeNewContracts(
             existing['optionSymbol'],
-            new['contract']['symbol'],
-            1,
+            amountToBuyBack,
             existingPremium,
-            new['projectedPremium']
+            new['contract']['symbol'],
+            configuration[asset]['amountOfHundreds'],
+            new['projectedPremium'],
         )
     else:
         orderId = api.writeNewContracts(
             None,
-            new['contract']['symbol'],
-            1,
             0,
+            0,
+            new['contract']['symbol'],
+            configuration[asset]['amountOfHundreds'],
             new['projectedPremium']
         )
 
-    checkedOrder = api.checkOrder(orderId)
+    for x in range(12):
+        # try to fill it for 12 * 5 seconds
+        print('Waiting for order to be filled ...')
 
-    if not checkedOrder['filled']:
-        for x in range(12):
-            # try to fill it for 12 * 5 seconds
-            print('Waiting for order to be filled ...')
+        checkedOrder = api.checkOrder(orderId)
 
-            checkedOrder = api.checkOrder(orderId)
+        if checkedOrder['filled']:
+            print('Order has been filled!')
+            break
 
-            if checkedOrder['filled']:
-                print('Order has been filled!')
-                break
-
-            time.sleep(5)
+        time.sleep(5)
 
     if not checkedOrder['filled']:
         api.cancelOrder(orderId)
@@ -152,7 +153,7 @@ def writeCc(api, asset, new, existing, existingPremium):
         'stockSymbol': asset,
         'optionSymbol': new['contract']['symbol'],
         'expiration': new['date'],
-        'count': -1,
+        'count': configuration[asset]['amountOfHundreds'],
         'strike': new['contract']['strike'],
         'receivedPremium': checkedOrder['price']
     }

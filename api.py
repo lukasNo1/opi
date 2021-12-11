@@ -98,11 +98,11 @@ class Api:
         except (KeyError, TypeError, ValueError):
             return False
 
-    def writeNewContracts(self, oldSymbol, newSymbol, amount, oldDebit, newCredit):
+    def writeNewContracts(self, oldSymbol, oldAmount, oldDebit, newSymbol, newAmount, newCredit):
         if oldSymbol is None:
             price = newCredit
             # init a new position, buy to open
-            order = tda.orders.options.option_buy_to_open_limit(newSymbol, amount, price) \
+            order = tda.orders.options.option_buy_to_open_limit(newSymbol, newAmount, price) \
                 .set_duration(tda.orders.common.Duration.DAY) \
                 .set_session(tda.orders.common.Session.NORMAL)
         else:
@@ -111,8 +111,8 @@ class Api:
             order = tda.orders.generic.OrderBuilder()
 
             order.set_complex_order_strategy_type(tda.orders.common.ComplexOrderStrategyType.DIAGONAL) \
-                .add_option_leg(tda.orders.common.OptionInstruction.BUY_TO_CLOSE, oldSymbol, amount) \
-                .add_option_leg(tda.orders.common.OptionInstruction.SELL_TO_OPEN, newSymbol, amount) \
+                .add_option_leg(tda.orders.common.OptionInstruction.BUY_TO_CLOSE, oldSymbol, oldAmount) \
+                .add_option_leg(tda.orders.common.OptionInstruction.SELL_TO_OPEN, newSymbol, newAmount) \
                 .set_duration(tda.orders.common.Duration.DAY) \
                 .set_session(tda.orders.common.Session.NORMAL) \
                 .set_price(price)

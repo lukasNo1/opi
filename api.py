@@ -2,7 +2,7 @@ import os
 import tda
 from tda.utils import Utils
 from webdriver_manager.chrome import ChromeDriverManager
-from configuration import ameritradeAccountId
+from configuration import ameritradeAccountId, debugCanSendOrders
 import datetime
 from statistics import median
 
@@ -38,7 +38,7 @@ class Api:
 
         try:
             if data[asset]['assetType'] == 'OPTION':
-                lastPrice = median([data[asset]['bidPrice'], data[asset]['askPrice']]) * 100
+                lastPrice = median([data[asset]['bidPrice'], data[asset]['askPrice']])
             else:
                 lastPrice = data[asset]['lastPrice']
         except KeyError:
@@ -101,32 +101,33 @@ class Api:
     def writeNewContracts(self, oldSymbol, oldAmount, oldDebit, newSymbol, newAmount, newCredit):
         if oldSymbol is None:
             price = newCredit
-            # init a new position, buy to open
-            order = tda.orders.options.option_buy_to_open_limit(newSymbol, newAmount, price) \
+            # init a new position, sell to open
+            order = tda.orders.options.option_sell_to_open_limit(newSymbol, newAmount, price) \
                 .set_duration(tda.orders.common.Duration.DAY) \
                 .set_session(tda.orders.common.Session.NORMAL)
         else:
             # roll
-            price = oldDebit - newCredit
+            price = -(oldDebit - newCredit)
             order = tda.orders.generic.OrderBuilder()
 
-            order.set_complex_order_strategy_type(tda.orders.common.ComplexOrderStrategyType.DIAGONAL) \
-                .add_option_leg(tda.orders.common.OptionInstruction.BUY_TO_CLOSE, oldSymbol, oldAmount) \
+            order.add_option_leg(tda.orders.common.OptionInstruction.BUY_TO_CLOSE, oldSymbol, oldAmount) \
                 .add_option_leg(tda.orders.common.OptionInstruction.SELL_TO_OPEN, newSymbol, newAmount) \
                 .set_duration(tda.orders.common.Duration.DAY) \
                 .set_session(tda.orders.common.Session.NORMAL) \
-                .set_price(price)
+                .set_price(price) \
+                .set_order_type(tda.orders.common.OrderType.NET_CREDIT) \
+                .set_order_strategy_type(tda.orders.common.OrderStrategyType.SINGLE)
 
-        print(order.build())
-        exit()
-        # todo uncomment this
-        # r = self.connectClient.place_order(ameritradeAccountId, order)
-        #
-        # assert r.status_code == 200, r.raise_for_status()
-        # order_id = Utils(self.connectClient, ameritradeAccountId).extract_order_id(r)
-        # assert order_id is not None
-        #
-        # return order_id
+        if not debugCanSendOrders:
+            print(order.build())
+            exit()
+
+        r = self.connectClient.place_order(ameritradeAccountId, order)
+
+        order_id = Utils(self.connectClient, ameritradeAccountId).extract_order_id(r)
+        assert order_id is not None
+
+        return order_id
 
     def checkOrder(self, orderId):
         r = self.connectClient.get_order(orderId, ameritradeAccountId)

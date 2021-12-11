@@ -38,3 +38,4 @@ configuration = {
 # don't touch these
 debugMarketOpen = False
 debugEverythingNeedsRolling = False
+debugCanSendOrders = True

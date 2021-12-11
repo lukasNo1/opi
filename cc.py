@@ -56,9 +56,9 @@ class Cc:
             return writingCcFailed('minStrike')
 
         # check minYield
-        projectedPremium = median([contract['bid'], contract['ask']]) * 100
+        projectedPremium = median([contract['bid'], contract['ask']])
 
-        if not configuration[asset]['rollCalendar'] and projectedPremium < configuration[asset]['minYield']:
+        if not configuration[asset]['rollCalendar'] and projectedPremium * 100 < configuration[asset]['minYield']:
             return writingCcFailed('minYield')
 
         return {

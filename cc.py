@@ -41,18 +41,18 @@ class Cc:
 
             # this technically allows a strike greater than the current one if none other available, which wouldn't be a calendar roll
             # this can be bad on a chain with few options, but we have to roll something, can't let it expire
-            minStrike = existing['strike']
+            # minStrike = existing['strike']
             strikePrice = existing['strike']
         else:
             atmPrice = api.getATMPrice(asset)
             strikePrice = atmPrice + configuration[asset]['minGapToATM']
 
-            if minStrike < atmPrice:
-                minStrike = atmPrice
+            if minStrike > strikePrice:
+                strikePrice = minStrike
 
         contract = optionChain.getContractFromDateChain(strikePrice, closestChain['contracts'])
 
-        if not contract or (not configuration[asset]['rollCalendar'] and contract['strike'] < minStrike):
+        if not contract:
             return writingCcFailed('minStrike')
 
         # check minYield

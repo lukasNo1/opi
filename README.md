@@ -43,11 +43,10 @@ Know that this option when used constantly will decline your returns more and mo
     'minGapToATM': 1,
 
     # don't write cc's with strikes below this value
-    # if this is ITM, ATM price gets used instead
     'minStrike': 0,
 
     # write cc's around this far out, bot gets the nearest contract possible
-    'days': 31,
+    'days': 30,
 
     # allow x days less or more
     'daysSpread': 10,

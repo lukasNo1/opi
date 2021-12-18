@@ -110,12 +110,18 @@ class Api:
             price = -(oldDebit - newCredit)
             order = tda.orders.generic.OrderBuilder()
 
+            orderType = tda.orders.common.OrderType.NET_CREDIT
+
+            if price < 0:
+                price = -price
+                orderType = tda.orders.common.OrderType.NET_DEBIT
+
             order.add_option_leg(tda.orders.common.OptionInstruction.BUY_TO_CLOSE, oldSymbol, oldAmount) \
                 .add_option_leg(tda.orders.common.OptionInstruction.SELL_TO_OPEN, newSymbol, newAmount) \
                 .set_duration(tda.orders.common.Duration.DAY) \
                 .set_session(tda.orders.common.Session.NORMAL) \
                 .set_price(price) \
-                .set_order_type(tda.orders.common.OrderType.NET_CREDIT) \
+                .set_order_type(orderType) \
                 .set_order_strategy_type(tda.orders.common.OrderStrategyType.SINGLE)
 
         if not debugCanSendOrders:

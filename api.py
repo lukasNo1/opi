@@ -74,24 +74,24 @@ class Api:
 
         return r.json()
 
-    def isOptionMarketOpen(self):
-        date = datetime.datetime.utcnow()
-        date = date.replace(tzinfo=datetime.timezone.utc)
+    def optionExecutionWindowOpen(self):
+        now = datetime.datetime.utcnow()
+        now = now.replace(tzinfo=datetime.timezone.utc)
 
-        r = self.connectClient.get_hours_for_single_market(tda.client.Client.Markets.OPTION, date)
+        r = self.connectClient.get_hours_for_single_market(tda.client.Client.Markets.OPTION, now)
 
         assert r.status_code == 200, r.raise_for_status()
 
         data = r.json()
 
         try:
-            start = data['option']['EQO']['sessionHours']['regularMarket'][0]['start']
             end = data['option']['EQO']['sessionHours']['regularMarket'][0]['end']
 
-            start = datetime.datetime.fromisoformat(start)
             end = datetime.datetime.fromisoformat(end)
+            # execute during the last open hour
+            start = end - datetime.timedelta(hours=1)
 
-            if start <= date <= end:
+            if start <= now <= end:
                 return True
             else:
                 return False

@@ -25,13 +25,13 @@ class Cc:
         # note: if the days or days - daysSpread in configuration amount to less than 3, date will always be too close
         # (with daysSpread only if it round down instead of up to get the best contract)
         dateTooClose = closestChain['days'] < 3 or abs(closestChain['days'] - configuration[asset]['days']) < -configuration[asset]['daysSpread']
-        dateTooFaar = abs(closestChain['days'] - configuration[asset]['days']) > configuration[asset]['daysSpread']
+        dateTooFar = abs(closestChain['days'] - configuration[asset]['days']) > configuration[asset]['daysSpread']
 
         minStrike = configuration[asset]['minStrike']
         atmPrice = 0
 
         # check if its within the spread
-        if dateTooClose or dateTooFaar:
+        if dateTooClose or dateTooFar:
             return writingCcFailed('days range')
 
         #  get the best matching contract

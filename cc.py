@@ -70,8 +70,10 @@ class Cc:
 
     def existing(self):
         db = TinyDB(dbName)
+        ret = db.search(Query().stockSymbol == self.asset)
+        db.close()
 
-        return db.search(Query().stockSymbol == self.asset)
+        return ret
 
 
 def writeCcs(api):
@@ -90,7 +92,10 @@ def writeCcs(api):
             print('The bot wants to write the following contract:')
             print(new)
 
-            existingPremium = api.getATMPrice(existing['optionSymbol'])
+            if existing:
+                existingPremium = api.getATMPrice(existing['optionSymbol'])
+            else:
+                existingPremium = 0
 
             writeCc(api, asset, new, existing, existingPremium)
         else:
@@ -162,6 +167,8 @@ def writeCc(api, asset, new, existing, existingPremium):
 
     db.remove(Query().stockSymbol == asset)
     db.insert(soldOption)
+
+    db.close()
 
     return soldOption
 

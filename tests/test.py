@@ -62,7 +62,7 @@ mockConfig = {
 mockConfigTest2 = {
     'QQQ': {
         'amountOfHundreds': 1,
-        'minGapToATM': 5,
+        'minGapToATM': 1,
         'minStrike': 0,
         'days': 4,
         'daysSpread': 0,

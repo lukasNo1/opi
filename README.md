@@ -64,9 +64,9 @@ The setting `rollWithoutDebit` is enabled by default.
 
 If you deactivate it, you should have some spare cash in the account to pay for rollup costs, because the new contract will most likely have less premium than the current one.
 
-If the cc is ITM at expiration and `rollWithoutDebit` is enabled, the bot will roll to a contract with the strike being the current strike price + `minGapToATM`.
+If `rollWithoutDebit` is enabled, the bot will roll to a contract with the strike being the ATM price + `minGapToATM` (normal behavior).
 
-If that results in debit, it rolls to the highest possible contract with credit instead (current strike price as minimum)
+If that results in debit, it rolls to the highest possible contract with credit instead (current cc strike price as minimum)
 
 ### Hardcoded rules
 

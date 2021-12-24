@@ -29,22 +29,20 @@ class Cc:
 
         minStrike = configuration[asset]['minStrike']
         atmPrice = api.getATMPrice(asset)
+        strikePrice = atmPrice + configuration[asset]['minGapToATM']
 
         # check if its within the spread
         if dateTooClose or dateTooFar:
             return writingCcFailed('days range')
 
         if existing and existing['strike'] < atmPrice and configuration[asset]['rollWithoutDebit']:
-            # use last strike price as base and ignore set minStrike
+            # ignore set minStrike
             # minStrike = existing['strike']
 
             # prevent paying debit with setting the minYield to the current price of existing
             minYield = existingPremium
-            strikePrice = existing['strike'] + configuration[asset]['minGapToATM']
         else:
-            # use current asset price as base
             minYield = configuration[asset]['minYield']
-            strikePrice = atmPrice + configuration[asset]['minGapToATM']
 
             if minStrike > strikePrice:
                 strikePrice = minStrike
@@ -60,7 +58,7 @@ class Cc:
 
         if projectedPremium < minYield:
             if configuration[asset]['rollWithoutDebit']:
-                print('Failed to write contract for CREDIT with existing strike + minGapToATM ('+str(strikePrice)+'), now trying to get a lower strike ...')
+                print('Failed to write contract for CREDIT with ATM price + minGapToATM ('+str(strikePrice)+'), now trying to get a lower strike ...')
 
                 # we need to get a lower strike instead to not pay debit (min: existing strike, max: existing price + minGapToATM) and try again
                 contract = optionChain.getContractFromDateChainByMinYield(existing['strike'], strikePrice, minYield, closestChain['contracts'])

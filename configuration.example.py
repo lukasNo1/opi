@@ -24,7 +24,7 @@ configuration = {
         # only write that cc if you can get this value or above in premium
         'minYield': 3.00,
 
-        # prevent paying for rollups (OVERWRITES minGapToATM, minStrike and minYield!!!)
+        # prevent paying for rollups (CAN IGNORE minGapToATM, minStrike and minYield!!!)
         'rollWithoutDebit': True,
 
         # None, email ### what should happen if the bot can't find a cc with the given configuration to write

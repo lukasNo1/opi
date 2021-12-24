@@ -50,7 +50,7 @@ Alternatively you can also hold a deep ITM call option (LEAP) representing said 
     # only write that cc if you can get this value or above in premium
     'minYield': 3.00,
 
-    # prevent paying for rollups (OVERWRITES minGapToATM, minStrike and minYield if ITM!!!)
+    # prevent paying for rollups (CAN IGNORE minGapToATM, minStrike and minYield if ITM!!!)
     'rollWithoutDebit': True,
 
     # None, email ### what should happen if the bot can't find a cc with the given configuration to write
@@ -62,7 +62,8 @@ A 'rollup' is the process of rolling to a higher strike price than the current o
 
 The setting `rollWithoutDebit` is enabled by default.
 
-If you deactivate it, you should have some spare cash in the account to pay for rollup costs, because the new contract will most likely have less premium than the current one.
+If you deactivate it, you should have some spare cash in the account to pay for rollup costs, because the new contract can have less premium than the current one,
+if the asset price went up.
 
 If `rollWithoutDebit` is enabled, the bot will roll to a contract with the strike being the ATM price + `minGapToATM` (normal behavior).
 

@@ -36,16 +36,13 @@ class Cc:
             return writingCcFailed('days range')
 
         if existing and existing['strike'] < atmPrice and configuration[asset]['rollWithoutDebit']:
-            # ignore set minStrike
-            # minStrike = existing['strike']
-
             # prevent paying debit with setting the minYield to the current price of existing
             minYield = existingPremium
         else:
             minYield = configuration[asset]['minYield']
 
-            if minStrike > strikePrice:
-                strikePrice = minStrike
+        if minStrike > strikePrice:
+            strikePrice = minStrike
 
         #  get the best matching contract
         contract = optionChain.getContractFromDateChain(strikePrice, closestChain['contracts'])
@@ -60,7 +57,8 @@ class Cc:
             if configuration[asset]['rollWithoutDebit']:
                 print('Failed to write contract for CREDIT with ATM price + minGapToATM ('+str(strikePrice)+'), now trying to get a lower strike ...')
 
-                # we need to get a lower strike instead to not pay debit (min: existing strike, max: existing price + minGapToATM) and try again
+                # we need to get a lower strike instead to not pay debit
+                # this works with overwritten minStrike and minYield config settings. the minGapToATM is only used for max price (ATM price + minGapToATM)
                 contract = optionChain.getContractFromDateChainByMinYield(existing['strike'], strikePrice, minYield, closestChain['contracts'])
 
                 # edge case where this new contract fails: If even a calendar roll wouldn't result in a credit

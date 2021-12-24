@@ -22,10 +22,10 @@ configuration = {
         'daysSpread': 10,
 
         # only write that cc if you can get this value or above in premium
-        'minYield': 300,
+        'minYield': 3.00,
 
-        # if we need to roll, only roll calendar (OVERWRITES minGapToATM, minStrike and minYield!!!)
-        'rollCalendar': False,
+        # prevent paying for rollups (OVERWRITES minGapToATM, minStrike and minYield!!!)
+        'rollWithoutDebit': True,
 
         # None, email ### what should happen if the bot can't find a cc with the given configuration to write
         'writeRequirementsNotMetAlert': None

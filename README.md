@@ -2,9 +2,11 @@
 
 **IN DEVELOPMENT!!!**
 
-## General warnings
+### Requirements
 
-If you want to use this bot you should know a thing or two about the stock market and especially options.
+- A TD Ameritrade account with options privileges
+- All python packages from requirements.txt installed
+- General understanding of the stock market and options
 
 If you don't understand what's written here or what the code of this bot does, then dont use it!
 
@@ -28,12 +30,6 @@ Alternatively you can also hold a deep ITM call option (LEAP) representing said 
 
 ---
 
-Also, you should have some spare cash in the account to pay for rollup costs (roll to a higher strike price with less premium than the current one)
-
-If you want to prohibit this, you can set the "rollCalendar" setting in the config to True
-
-Know that this option when used constantly will decline your returns more and more, as the asset climbs higher and the extrinsic value of that option falls
-
 ### Configuration
 
     # how many cc's to write
@@ -52,20 +48,30 @@ Know that this option when used constantly will decline your returns more and mo
     'daysSpread': 10,
 
     # only write that cc if you can get this value or above in premium
-    'minYield': 300,
+    'minYield': 3.00,
 
-    # if we need to roll, only roll calendar (OVERWRITES minGapToATM, minStrike and minYield!!!)
-    'rollCalendar': False,
+    # prevent paying for rollups (OVERWRITES minGapToATM, minStrike and minYield if ITM!!!)
+    'rollWithoutDebit': True,
 
     # None, email ### what should happen if the bot can't find a cc with the given configuration to write
     'writeRequirementsNotMetAlert': None
 
+### Rollups: Further explanation
+
+A 'rollup' is the process of rolling to a higher strike price than the current one.
+
+The setting `rollWithoutDebit` is enabled by default.
+
+If you deactivate it, you should have some spare cash in the account to pay for rollup costs, because the new contract will most likely have less premium than the current one.
+
+If the cc is ITM at expiration and `rollWithoutDebit` is enabled, the bot will roll to a contract with the strike being the current strike price + `minGapToATM`.
+
+If that results in debit, it rolls to the highest possible contract with credit instead (current strike price as minimum)
 
 ### Hardcoded rules
 
 - Options with expiration dates below 3 days out are not allowed and will be handled according to the `writeRequirementsNotMetAlert` setting
     - So `days` - `daysSpread` must always amount to 3 or more for the bot to work
-- ITM call options are only possible with `rollCalendar` enabled
 
 ### Risks
 

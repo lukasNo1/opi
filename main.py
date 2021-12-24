@@ -14,9 +14,9 @@ while True:
     canExecute = debugMarketOpen or api.optionExecutionWindowOpen()
 
     if canExecute:
-        # todo break when nothing to write, then sleep for 24 hours from execution start date
+        # todo cache execution date from api and sleep until that date & time
         writeCcs(api)
     else:
-        print('Waiting for option execution window to open ...')
+        print('Waiting for last market hour ...')
 
     time.sleep(60.0 - ((time.time() - starttime) % 60.0))

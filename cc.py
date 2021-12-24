@@ -11,7 +11,7 @@ class Cc:
     def __init__(self, asset):
         self.asset = asset
 
-    def findNew(self, api, existing):
+    def findNew(self, api, existing, existingPremium):
         asset = self.asset
 
         optionChain = OptionChain(api, asset, configuration[asset]['days'], configuration[asset]['daysSpread'])
@@ -28,28 +28,28 @@ class Cc:
         dateTooFar = abs(closestChain['days'] - configuration[asset]['days']) > configuration[asset]['daysSpread']
 
         minStrike = configuration[asset]['minStrike']
-        atmPrice = 0
+        atmPrice = api.getATMPrice(asset)
 
         # check if its within the spread
         if dateTooClose or dateTooFar:
             return writingCcFailed('days range')
 
-        #  get the best matching contract
-        if configuration[asset]['rollCalendar']:
-            if not existing:
-                return writingCcFailed('roll calendar selected but no option to roll')
-
-            # this technically allows a strike greater than the current one if none other available, which wouldn't be a calendar roll
-            # this can be bad on a chain with few options, but we have to roll something, can't let it expire
+        if existing and existing['strike'] < atmPrice and configuration[asset]['rollWithoutDebit']:
+            # use last strike price as base and ignore set minStrike
             # minStrike = existing['strike']
-            strikePrice = existing['strike']
+
+            # prevent paying debit with setting the minYield to the current price of existing
+            minYield = existingPremium
+            strikePrice = existing['strike'] + configuration[asset]['minGapToATM']
         else:
-            atmPrice = api.getATMPrice(asset)
+            # use current asset price as base
+            minYield = configuration[asset]['minYield']
             strikePrice = atmPrice + configuration[asset]['minGapToATM']
 
             if minStrike > strikePrice:
                 strikePrice = minStrike
 
+        #  get the best matching contract
         contract = optionChain.getContractFromDateChain(strikePrice, closestChain['contracts'])
 
         if not contract:
@@ -58,8 +58,21 @@ class Cc:
         # check minYield
         projectedPremium = median([contract['bid'], contract['ask']])
 
-        if not configuration[asset]['rollCalendar'] and projectedPremium * 100 < configuration[asset]['minYield']:
-            return writingCcFailed('minYield')
+        if projectedPremium < minYield:
+            if configuration[asset]['rollWithoutDebit']:
+                print('Failed to write contract for CREDIT with existing strike + minGapToATM ('+str(strikePrice)+'), now trying to get a lower strike ...')
+
+                # we need to get a lower strike instead to not pay debit (min: existing strike, max: existing price + minGapToATM) and try again
+                contract = optionChain.getContractFromDateChainByMinYield(existing['strike'], strikePrice, minYield, closestChain['contracts'])
+
+                # edge case where this new contract fails: If even a calendar roll wouldn't result in a credit
+                if not contract:
+                    return writingCcFailed('minYield')
+
+                projectedPremium = median([contract['bid'], contract['ask']])
+            else:
+                # the contract we want has not enough premium
+                return writingCcFailed('minYield')
 
         return {
             'date': closestChain['date'],
@@ -87,15 +100,15 @@ def writeCcs(api):
             existing = None
 
         if (existing and needsRolling(existing)) or not existing:
-            new = cc.findNew(api, existing)
-
-            print('The bot wants to write the following contract:')
-            print(new)
-
             if existing:
                 existingPremium = api.getATMPrice(existing['optionSymbol'])
             else:
                 existingPremium = 0
+
+            new = cc.findNew(api, existing, existingPremium)
+
+            print('The bot wants to write the following contract:')
+            print(new)
 
             writeCc(api, asset, new, existing, existingPremium)
         else:

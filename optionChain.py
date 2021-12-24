@@ -1,3 +1,6 @@
+from statistics import median
+
+
 class OptionChain:
     strikes = 24
 
@@ -51,13 +54,32 @@ class OptionChain:
 
         return map
 
-    def getContractFromDateChain(self, strike, chain):
+    def sortDateChain(self, chain):
         # ensure this is sorted by strike
-        chain = sorted(chain, key=lambda d: d['strike'])
+        return sorted(chain, key=lambda d: d['strike'])
+
+    def getContractFromDateChain(self, strike, chain):
+        chain = self.sortDateChain(chain)
 
         # get first contract at or above strike
         for contract in chain:
             if contract['strike'] >= strike:
+                return contract
+
+        return None
+
+    def getContractFromDateChainByMinYield(self, minStrike, maxStrike, minYield, chain):
+        chain = self.sortDateChain(chain)
+
+        # highest strike to lowest
+        for contract in reversed(chain):
+            if contract['strike'] > maxStrike:
+                continue
+
+            if contract['strike'] < minStrike:
+                break
+
+            if median([contract['bid'], contract['ask']]) >= minYield:
                 return contract
 
         return None

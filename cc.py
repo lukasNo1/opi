@@ -35,7 +35,7 @@ class Cc:
         if dateTooClose or dateTooFar:
             return writingCcFailed('days range')
 
-        if existing and existing['strike'] < atmPrice and configuration[asset]['rollWithoutDebit']:
+        if existing and configuration[asset]['rollWithoutDebit']:
             # prevent paying debit with setting the minYield to the current price of existing
             minYield = existingPremium
         else:
@@ -54,7 +54,7 @@ class Cc:
         projectedPremium = median([contract['bid'], contract['ask']])
 
         if projectedPremium < minYield:
-            if configuration[asset]['rollWithoutDebit']:
+            if existing and configuration[asset]['rollWithoutDebit']:
                 print('Failed to write contract for CREDIT with ATM price + minGapToATM ('+str(strikePrice)+'), now trying to get a lower strike ...')
 
                 # we need to get a lower strike instead to not pay debit

@@ -35,6 +35,16 @@ configuration = {
     }
 }
 
+# Required for 'botErrorAlert' or 'writeRequirementsNotMetAlert' email
+mailConfig = {
+    'smtp': None,
+    'port': 587,
+    'from': None,
+    'to': None,
+    'username': None,
+    'password': None,
+}
+
 # don't touch these
 debugMarketOpen = False
 debugEverythingNeedsRolling = False

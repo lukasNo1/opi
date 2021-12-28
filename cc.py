@@ -19,11 +19,16 @@ class Cc:
 
         chain = optionChain.get()
 
+        if not chain:
+            return error.botFailed(asset, 'No chain found within given days range')
+
         # get closest chain to days
         closestChain = min(chain, key=lambda x: abs(x['days'] - configuration[asset]['days']))
 
         # note: if the days or days - daysSpread in configuration amount to less than 3, date will always be too close
         # (with daysSpread only if it round down instead of up to get the best contract)
+
+        # other than the 3 days check, this isn't really necessary as it already gets filtered in the api, but better to be sure
         dateTooClose = closestChain['days'] < 3 or abs(closestChain['days'] - configuration[asset]['days']) < -configuration[asset]['daysSpread']
         dateTooFar = abs(closestChain['days'] - configuration[asset]['days']) > configuration[asset]['daysSpread']
 
@@ -55,7 +60,7 @@ class Cc:
 
         if projectedPremium < minYield:
             if existing and configuration[asset]['rollWithoutDebit']:
-                print('Failed to write contract for CREDIT with ATM price + minGapToATM ('+str(strikePrice)+'), now trying to get a lower strike ...')
+                print('Failed to write contract for CREDIT with ATM price + minGapToATM (' + str(strikePrice) + '), now trying to get a lower strike ...')
 
                 # we need to get a lower strike instead to not pay debit
                 # this works with overwritten minStrike and minYield config settings. the minGapToATM is only used for max price (ATM price + minGapToATM)

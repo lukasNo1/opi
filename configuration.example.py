@@ -4,6 +4,9 @@ ameritradeAccountId = ''
 
 dbName = 'db.json'
 
+# console, email
+botErrorAlert = 'console'
+
 configuration = {
     'QQQ': {
         # how many cc's to write
@@ -27,12 +30,10 @@ configuration = {
         # prevent paying for rollups (CAN IGNORE minGapToATM, minStrike and minYield!!!)
         'rollWithoutDebit': True,
 
-        # None, email ### what should happen if the bot can't find a cc with the given configuration to write
-        'writeRequirementsNotMetAlert': None
+        # console, email ### what should happen if the bot can't find a cc with the given configuration to write
+        'writeRequirementsNotMetAlert': 'console'
     }
 }
-
-
 
 # don't touch these
 debugMarketOpen = False

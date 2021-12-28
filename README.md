@@ -53,8 +53,8 @@ Alternatively you can also hold a deep ITM call option (LEAP) representing said 
     # prevent paying for rollups (CAN IGNORE minGapToATM, minStrike and minYield if ITM!!!)
     'rollWithoutDebit': True,
 
-    # None, email ### what should happen if the bot can't find a cc with the given configuration to write
-    'writeRequirementsNotMetAlert': None
+    # console, email ### what should happen if the bot can't find a cc with the given configuration to write
+    'writeRequirementsNotMetAlert': 'console'
 
 ### Rollups: Further explanation
 

@@ -5,6 +5,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from configuration import ameritradeAccountId, debugCanSendOrders
 import datetime
 from statistics import median
+import error
 
 
 class Api:
@@ -18,14 +19,17 @@ class Api:
         self.apiKey = apiKey
         self.apiRedirectUri = apiRedirectUri
 
+    def setup(self):
+        from selenium import webdriver
+        with webdriver.Chrome(ChromeDriverManager().install()) as driver:
+            self.connectClient = tda.auth.client_from_login_flow(
+                driver, self.apiKey, self.apiRedirectUri, self.tokenPath)
+
     def connect(self):
         try:
             self.connectClient = tda.auth.client_from_token_file(self.tokenPath, self.apiKey)
         except FileNotFoundError:
-            from selenium import webdriver
-            with webdriver.Chrome(ChromeDriverManager().install()) as driver:
-                self.connectClient = tda.auth.client_from_login_flow(
-                    driver, self.apiKey, self.apiRedirectUri, self.tokenPath)
+            return error.botFailed(None, 'Manual authentication required, run setupApi.py first.')
 
     def getATMPrice(self, asset):
         # client can be None
@@ -42,9 +46,7 @@ class Api:
             else:
                 lastPrice = data[asset]['lastPrice']
         except KeyError:
-            # todo better exception handling
-            print('wrong data from api')
-            exit(1)
+            return error.botFailed(asset, 'Wrong data from api when getting ATM price')
 
         return lastPrice
 
@@ -74,7 +76,7 @@ class Api:
 
         return r.json()
 
-    def optionExecutionWindowOpen(self):
+    def getOptionExecutionWindow(self):
         now = datetime.datetime.utcnow()
         now = now.replace(tzinfo=datetime.timezone.utc)
 
@@ -92,11 +94,23 @@ class Api:
             start = end - datetime.timedelta(hours=1)
 
             if start <= now <= end:
-                return True
+                return {
+                    'open': True,
+                    'openDate': start,
+                    'nowDate': now
+                }
             else:
-                return False
+                return {
+                    'open': False,
+                    'openDate': start,
+                    'nowDate': now
+                }
         except (KeyError, TypeError, ValueError):
-            return False
+            return {
+                'open': False,
+                'openDate': None,
+                'nowDate': now
+            }
 
     def writeNewContracts(self, oldSymbol, oldAmount, oldDebit, newSymbol, newAmount, newCredit):
         if oldSymbol is None:

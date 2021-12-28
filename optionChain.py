@@ -1,4 +1,6 @@
 from statistics import median
+import datetime
+import error
 
 
 class OptionChain:
@@ -24,8 +26,11 @@ class OptionChain:
             for key, value in tmp.items():
                 split = key.split(':')
 
-                date = split[0]  # todo ensure yyyy-mm-dd
+                date = split[0]
                 days = int(split[1])
+
+                if not self.validDateFormat(date):
+                    return error.botFailed(self.asset, 'Incorrect date format from api: ' + date)
 
                 contracts = []
 
@@ -48,9 +53,7 @@ class OptionChain:
                 ])
 
         except KeyError:
-            # todo better exception handling
-            print('wrong data from api')
-            exit(1)
+            return error.botFailed(self.asset, 'Wrong data from api')
 
         return map
 
@@ -83,3 +86,11 @@ class OptionChain:
                 return contract
 
         return None
+
+    def validDateFormat(self, date):
+        try:
+            datetime.datetime.strptime(date, '%Y-%m-%d')
+
+            return True
+        except ValueError:
+            return False

@@ -4,6 +4,7 @@ from statistics import median
 from tinydb import TinyDB, Query
 import datetime
 import time
+import error
 
 
 class Cc:
@@ -17,7 +18,6 @@ class Cc:
         optionChain = OptionChain(api, asset, configuration[asset]['days'], configuration[asset]['daysSpread'])
 
         chain = optionChain.get()
-        # todo handle no chain found
 
         # get closest chain to days
         closestChain = min(chain, key=lambda x: abs(x['days'] - configuration[asset]['days']))
@@ -33,7 +33,7 @@ class Cc:
 
         # check if its within the spread
         if dateTooClose or dateTooFar:
-            return writingCcFailed('days range')
+            return error.botFailed(asset, 'No contract found within given days range')
 
         if existing and configuration[asset]['rollWithoutDebit']:
             # prevent paying debit with setting the minYield to the current price of existing
@@ -48,7 +48,7 @@ class Cc:
         contract = optionChain.getContractFromDateChain(strikePrice, closestChain['contracts'])
 
         if not contract:
-            return writingCcFailed('minStrike')
+            return error.botFailed('minStrike')
 
         # check minYield
         projectedPremium = median([contract['bid'], contract['ask']])
@@ -63,12 +63,12 @@ class Cc:
 
                 # edge case where this new contract fails: If even a calendar roll wouldn't result in a credit
                 if not contract:
-                    return writingCcFailed('minYield')
+                    return error.botFailed(asset, 'minYield not met')
 
                 projectedPremium = median([contract['bid'], contract['ask']])
             else:
                 # the contract we want has not enough premium
-                return writingCcFailed('minYield')
+                return error.botFailed(asset, 'minYield not met')
 
         return {
             'date': closestChain['date'],
@@ -161,7 +161,7 @@ def writeCc(api, asset, new, existing, existingPremium):
         api.cancelOrder(orderId)
 
         # todo maybe lower the price instead of just failing
-        return writingCcFailed('order cant be filled')
+        return error.botFailed(asset, 'order cant be filled')
 
     soldOption = {
         'stockSymbol': asset,
@@ -180,9 +180,3 @@ def writeCc(api, asset, new, existing, existingPremium):
     db.close()
 
     return soldOption
-
-
-def writingCcFailed(message):
-    # todo throw according to writeRequirementsNotMetAlert
-    print(message)
-    exit(1)

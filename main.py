@@ -6,6 +6,10 @@ import datetime
 
 api = Api(apiKey, apiRedirectUri)
 
+defaultWaitTime = 3600
+retryOnErrorTime = 60
+
+
 while True:
     api.connect()
 
@@ -13,6 +17,8 @@ while True:
 
     if debugMarketOpen or execWindow['open']:
         writeCcs(api)
+
+        time.sleep(defaultWaitTime)
     else:
         print('Waiting for last market hour ...')
 
@@ -25,8 +31,8 @@ while True:
             else:
                 # we are past open date, but the market is not open
                 print('Market closed. Rechecking in 1 hour ...')
-                time.sleep(3600)
+                time.sleep(defaultWaitTime)
 
         else:
             print('Cant get the market open date, retrying in 1 min ...')
-            time.sleep(60.0)
+            time.sleep(retryOnErrorTime)

@@ -4,7 +4,7 @@ import api
 import json
 import cc
 import os
-import error
+import alert
 
 from tinydb import TinyDB
 
@@ -55,8 +55,7 @@ mockConfig = {
         'days': 30,
         'daysSpread': 10,
         'minYield': 0,
-        'rollWithoutDebit': True,
-        'writeRequirementsNotMetAlert': 'console'
+        'rollWithoutDebit': True
     }
 }
 
@@ -68,8 +67,7 @@ mockConfigTest2 = {
         'days': 4,
         'daysSpread': 0,
         'minYield': 0,
-        'rollWithoutDebit': True,
-        'writeRequirementsNotMetAlert': 'console'
+        'rollWithoutDebit': True
     }
 }
 
@@ -82,7 +80,7 @@ class ApiTestCase(unittest.TestCase):
     @patch('api.Api', MockApi)
     @patch.dict('cc.configuration', mockConfig)
     @patch('cc.dbName', dbName)
-    @patch('error.botErrorAlert', 'console')
+    @patch('alert.botAlert', 'console')
     def test_everything(self):
         apiObj = api.Api('123', '456')
 
@@ -92,7 +90,7 @@ class ApiTestCase(unittest.TestCase):
     @patch('api.Api', MockApi)
     @patch.dict('cc.configuration', mockConfigTest2)
     @patch('cc.dbName', dbName)
-    @patch('error.botErrorAlert', 'console')
+    @patch('alert.botAlert', 'console')
     def test_roll_without_debit_min_yield(self):
         apiObj = api.Api('123', '456')
 

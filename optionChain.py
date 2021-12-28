@@ -1,6 +1,6 @@
 from statistics import median
 import datetime
-import error
+import alert
 
 
 class OptionChain:
@@ -30,7 +30,7 @@ class OptionChain:
                 days = int(split[1])
 
                 if not self.validDateFormat(date):
-                    return error.botFailed(self.asset, 'Incorrect date format from api: ' + date)
+                    return alert.botFailed(self.asset, 'Incorrect date format from api: ' + date)
 
                 contracts = []
 
@@ -53,7 +53,7 @@ class OptionChain:
                 ])
 
         except KeyError:
-            return error.botFailed(self.asset, 'Wrong data from api')
+            return alert.botFailed(self.asset, 'Wrong data from api')
 
         return map
 

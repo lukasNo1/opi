@@ -5,7 +5,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from configuration import ameritradeAccountId, debugCanSendOrders
 import datetime
 from statistics import median
-import error
+import alert
 
 
 class Api:
@@ -29,7 +29,7 @@ class Api:
         try:
             self.connectClient = tda.auth.client_from_token_file(self.tokenPath, self.apiKey)
         except FileNotFoundError:
-            return error.botFailed(None, 'Manual authentication required, run setupApi.py first.')
+            return alert.botFailed(None, 'Manual authentication required, run setupApi.py first.')
 
     def getATMPrice(self, asset):
         # client can be None
@@ -46,7 +46,7 @@ class Api:
             else:
                 lastPrice = data[asset]['lastPrice']
         except KeyError:
-            return error.botFailed(asset, 'Wrong data from api when getting ATM price')
+            return alert.botFailed(asset, 'Wrong data from api when getting ATM price')
 
         return lastPrice
 

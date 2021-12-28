@@ -4,8 +4,8 @@ ameritradeAccountId = ''
 
 dbName = 'db.json'
 
-# console, email
-botErrorAlert = 'console'
+# console, email ### where to alert regarding errors or order fills
+botAlert = 'console'
 
 configuration = {
     'QQQ': {
@@ -28,14 +28,11 @@ configuration = {
         'minYield': 3.00,
 
         # prevent paying for rollups (CAN IGNORE minGapToATM, minStrike and minYield!!!)
-        'rollWithoutDebit': True,
-
-        # console, email ### what should happen if the bot can't find a cc with the given configuration to write
-        'writeRequirementsNotMetAlert': 'console'
+        'rollWithoutDebit': True
     }
 }
 
-# Required for 'botErrorAlert' or 'writeRequirementsNotMetAlert' email
+# Required for 'botAlert' email
 mailConfig = {
     'smtp': None,
     'port': 587,

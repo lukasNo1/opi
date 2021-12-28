@@ -51,10 +51,11 @@ Alternatively you can also hold a deep ITM call option (LEAP) representing said 
     'minYield': 3.00,
 
     # prevent paying for rollups (CAN IGNORE minGapToATM, minStrike and minYield if ITM!!!)
-    'rollWithoutDebit': True,
+    'rollWithoutDebit': True
 
-    # console, email ### what should happen if the bot can't find a cc with the given configuration to write
-    'writeRequirementsNotMetAlert': 'console'
+The bot will inform you about important events either directly in the console or over email.
+
+(For emails you need to add credentials for a smtp server in configuration.py and set the 'botAlert' setting to "email")
 
 ### Rollups: Further explanation
 
@@ -71,7 +72,7 @@ If that results in debit, it rolls to the highest possible contract with credit 
 
 ### Hardcoded rules
 
-- Options with expiration dates below 3 days out are not allowed and will be handled according to the `writeRequirementsNotMetAlert` setting
+- Options with expiration dates below 3 days out are not allowed and will fail
     - So `days` - `daysSpread` must always amount to 3 or more for the bot to work
 
 ### Risks

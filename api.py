@@ -91,7 +91,19 @@ class Api:
         data = r.json()
 
         try:
-            end = data['option']['EQO']['sessionHours']['regularMarket'][0]['end']
+            marketKey = list(data['option'].keys())[0]
+
+            sessionHours = data['option'][marketKey]['sessionHours']
+
+            if sessionHours is None:
+                # the market is closed today
+                return {
+                    'open': False,
+                    'openDate': None,
+                    'nowDate': now
+                }
+
+            end = sessionHours['regularMarket'][0]['end']
 
             end = datetime.datetime.fromisoformat(end)
             # execute during the last open hour
@@ -110,11 +122,7 @@ class Api:
                     'nowDate': now
                 }
         except (KeyError, TypeError, ValueError):
-            return {
-                'open': False,
-                'openDate': None,
-                'nowDate': now
-            }
+            return alert.botFailed(None, 'Error getting the market hours for today.')
 
     def writeNewContracts(self, oldSymbol, oldAmount, oldDebit, newSymbol, newAmount, newCredit):
         if oldSymbol is None:

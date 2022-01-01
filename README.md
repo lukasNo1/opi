@@ -1,7 +1,5 @@
 # OPI - Option passive income bot
 
-**IN DEVELOPMENT!!!**
-
 ### Requirements
 
 - A TD Ameritrade account with options privileges

@@ -111,6 +111,9 @@ def writeCcs(api):
             print('The bot wants to write the following contract:')
             print(new)
 
+            # for better user experience we could check here if user has
+            # amountOfHundreds * 100 shares or amountOfHundreds * 1 options LOWER than new strike in acc (for safety)
+
             writeCc(api, asset, new, existing, existingPremium)
         else:
             print('Nothing to write ...')

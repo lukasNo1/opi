@@ -1,5 +1,5 @@
-apiKey = ''
-apiRedirectUri = ''
+apiKey = ''  # create an app on https://developer.tdameritrade.com/ to get one
+apiRedirectUri = 'https://localhost'
 ameritradeAccountId = ''
 
 dbName = 'db.json'

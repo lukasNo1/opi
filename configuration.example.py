@@ -12,7 +12,7 @@ configuration = {
         # how many cc's to write
         'amountOfHundreds': 1,
 
-        # only buy cc's at or over current asset price + this value
+        # only write cc's at or over current asset price + this value
         'minGapToATM': 1,
 
         # don't write cc's with strikes below this value

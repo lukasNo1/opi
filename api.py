@@ -126,14 +126,14 @@ class Api:
 
     def writeNewContracts(self, oldSymbol, oldAmount, oldDebit, newSymbol, newAmount, newCredit):
         if oldSymbol is None:
-            price = newCredit
+            price = newCredit * newAmount
             # init a new position, sell to open
             order = tda.orders.options.option_sell_to_open_limit(newSymbol, newAmount, price) \
                 .set_duration(tda.orders.common.Duration.DAY) \
                 .set_session(tda.orders.common.Session.NORMAL)
         else:
             # roll
-            price = -(oldDebit - newCredit)
+            price = -(oldDebit * oldAmount - newCredit * newAmount)
             order = tda.orders.generic.OrderBuilder()
 
             orderType = tda.orders.common.OrderType.NET_CREDIT

@@ -162,17 +162,24 @@ def writeCc(api, asset, new, existing, existingPremium, retry=0):
             orderPricePercentage
         )
 
-    for x in range(12):
-        # try to fill it for 12 * 5 seconds
+    checkFillXTimes = 12
+
+    if retry > 0:
+        # go faster through it
+        # todo maybe define a max time for writeCc function, as this can run well past 1 hour with dumb config settings and many assets
+        checkFillXTimes = 6
+
+    for x in range(checkFillXTimes):
+        # try to fill it for x * 5 seconds
         print('Waiting for order to be filled ...')
+
+        time.sleep(5)
 
         checkedOrder = api.checkOrder(orderId)
 
         if checkedOrder['filled']:
             print('Order has been filled!')
             break
-
-        time.sleep(5)
 
     if not checkedOrder['filled']:
         api.cancelOrder(orderId)

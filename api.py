@@ -124,16 +124,22 @@ class Api:
         except (KeyError, TypeError, ValueError):
             return alert.botFailed(None, 'Error getting the market hours for today.')
 
-    def writeNewContracts(self, oldSymbol, oldAmount, oldDebit, newSymbol, newAmount, newCredit):
+    def writeNewContracts(self, oldSymbol, oldAmount, oldDebit, newSymbol, newAmount, newCredit, fullPricePercentage):
+        """
+           Send an order for writing new contracts to the api
+           fullPricePercentage is for reducing the price by a custom amount if we cant get filled
+       """
+
         if oldSymbol is None:
-            price = newCredit * newAmount
+            price = newCredit * newAmount * (fullPricePercentage / 100)
+
             # init a new position, sell to open
             order = tda.orders.options.option_sell_to_open_limit(newSymbol, newAmount, price) \
                 .set_duration(tda.orders.common.Duration.DAY) \
                 .set_session(tda.orders.common.Session.NORMAL)
         else:
             # roll
-            price = -(oldDebit * oldAmount - newCredit * newAmount)
+            price = -((oldDebit * oldAmount - newCredit * newAmount) * (fullPricePercentage / 100))
             order = tda.orders.generic.OrderBuilder()
 
             orderType = tda.orders.common.OrderType.NET_CREDIT

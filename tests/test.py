@@ -34,7 +34,7 @@ class MockApi:
     def optionExecutionWindowOpen(self):
         return True
 
-    def writeNewContracts(self, oldSymbol, oldAmount, oldDebit, newSymbol, newAmount, newCredit):
+    def writeNewContracts(self, oldSymbol, oldAmount, oldDebit, newSymbol, newAmount, newCredit, fullPricePercentage):
         return 123
 
     def checkOrder(self, orderId):
@@ -55,7 +55,8 @@ mockConfig = {
         'days': 30,
         'daysSpread': 10,
         'minYield': 0,
-        'rollWithoutDebit': True
+        'rollWithoutDebit': True,
+        'allowedPriceReductionPercent': 0
     }
 }
 
@@ -67,7 +68,8 @@ mockConfigTest2 = {
         'days': 4,
         'daysSpread': 0,
         'minYield': 0,
-        'rollWithoutDebit': True
+        'rollWithoutDebit': True,
+        'allowedPriceReductionPercent': 0
     }
 }
 

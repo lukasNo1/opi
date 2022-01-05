@@ -130,7 +130,14 @@ def needsRolling(cc):
     return nowPlusOffset >= cc['expiration']
 
 
-def writeCc(api, asset, new, existing, existingPremium):
+def writeCc(api, asset, new, existing, existingPremium, retry=0):
+    maxRetries = configuration[asset]['allowedPriceReductionPercent']
+    # lower the price by 1% for each retry if we couldn't get filled
+    orderPricePercentage = 100 - retry
+
+    if retry > maxRetries:
+        return alert.botFailed(asset, 'Order cant be filled, tried with ' + str(orderPricePercentage) + '% of the price.')
+
     if existing and existingPremium:
         # we use the db count here to prevent buying back more than we must if the amount in the configuration has changed
         amountToBuyBack = existing['count']
@@ -142,6 +149,7 @@ def writeCc(api, asset, new, existing, existingPremium):
             new['contract']['symbol'],
             configuration[asset]['amountOfHundreds'],
             new['projectedPremium'],
+            orderPricePercentage
         )
     else:
         orderId = api.writeNewContracts(
@@ -150,7 +158,8 @@ def writeCc(api, asset, new, existing, existingPremium):
             0,
             new['contract']['symbol'],
             configuration[asset]['amountOfHundreds'],
-            new['projectedPremium']
+            new['projectedPremium'],
+            orderPricePercentage
         )
 
     for x in range(12):
@@ -168,8 +177,8 @@ def writeCc(api, asset, new, existing, existingPremium):
     if not checkedOrder['filled']:
         api.cancelOrder(orderId)
 
-        # todo maybe lower the price instead of just failing
-        return alert.botFailed(asset, 'Order cant be filled')
+        print('Cant fill order, retrying with lower price ...')
+        return writeCc(api, asset, new, existing, existingPremium, retry + 1)
 
     soldOption = {
         'stockSymbol': asset,

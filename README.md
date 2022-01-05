@@ -49,7 +49,11 @@ Alternatively you can also hold a deep ITM call option (LEAP) representing said 
     'minYield': 3.00,
 
     # prevent paying for rollups (CAN IGNORE minGapToATM, minStrike and minYield if ITM!!!)
-    'rollWithoutDebit': True
+    'rollWithoutDebit': True,
+
+    # if we can't get filled on an order, how much is the bot allowed to
+    # reduce the price from mid price to try and get a fill (percentage 0-100)
+    'allowedPriceReductionPercent': 2
 
 The bot will inform you about important events either directly in the console or over email.
 
@@ -80,3 +84,6 @@ If that results in debit, it rolls to the highest possible contract with credit 
 Do not use this bot with assets that have low volatility or too few options
 
 **Options** - Covered calls are the least risky options, nonetheless, if you don't know what you're doing or fuck up the configuration above, you can lose a lot or even all of your money
+
+**Selling free contracts** - It should be obvious, but do not set the `allowedPriceReductionPercent` config to 100 as that can result in a 100% price reduction
+which allows the bot to give away the options for free.

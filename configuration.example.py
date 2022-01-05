@@ -28,7 +28,11 @@ configuration = {
         'minYield': 3.00,
 
         # prevent paying for rollups (CAN IGNORE minGapToATM, minStrike and minYield!!!)
-        'rollWithoutDebit': True
+        'rollWithoutDebit': True,
+
+        # if we can't get filled on an order, how much is the bot allowed to
+        # reduce the price from mid price to try and get a fill (percentage 0-100)
+        'allowedPriceReductionPercent': 2
     }
 }
 

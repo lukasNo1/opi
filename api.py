@@ -136,7 +136,8 @@ class Api:
             # init a new position, sell to open
             order = tda.orders.options.option_sell_to_open_limit(newSymbol, newAmount, price) \
                 .set_duration(tda.orders.common.Duration.DAY) \
-                .set_session(tda.orders.common.Session.NORMAL)
+                .set_session(tda.orders.common.Session.NORMAL)\
+                .set_special_instruction(tda.orders.common.SpecialInstruction.ALL_OR_NONE)
         else:
             # roll
             price = -((oldDebit * oldAmount - newCredit * newAmount) * (fullPricePercentage / 100))
@@ -154,7 +155,8 @@ class Api:
                 .set_session(tda.orders.common.Session.NORMAL) \
                 .set_price(price) \
                 .set_order_type(orderType) \
-                .set_order_strategy_type(tda.orders.common.OrderStrategyType.SINGLE)
+                .set_order_strategy_type(tda.orders.common.OrderStrategyType.SINGLE)\
+                .set_special_instruction(tda.orders.common.SpecialInstruction.ALL_OR_NONE)
 
         if not debugCanSendOrders:
             print(order.build())
@@ -177,9 +179,8 @@ class Api:
         try:
             filled = data['status'] == 'FILLED'
             price = data['price']
-        except (KeyError):
-            filled = False
-            price = 0
+        except KeyError:
+            return alert.botFailed(None, 'Error while checking working order')
 
         return {
             'filled': filled,

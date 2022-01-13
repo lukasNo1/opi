@@ -1,3 +1,4 @@
+import math
 import os
 import tda
 from tda.utils import Utils
@@ -136,7 +137,7 @@ class Api:
             # init a new position, sell to open
             order = tda.orders.options.option_sell_to_open_limit(newSymbol, newAmount, price) \
                 .set_duration(tda.orders.common.Duration.DAY) \
-                .set_session(tda.orders.common.Session.NORMAL)\
+                .set_session(tda.orders.common.Session.NORMAL) \
                 .set_special_instruction(tda.orders.common.SpecialInstruction.ALL_OR_NONE)
         else:
             # roll
@@ -155,7 +156,7 @@ class Api:
                 .set_session(tda.orders.common.Session.NORMAL) \
                 .set_price(price) \
                 .set_order_type(orderType) \
-                .set_order_strategy_type(tda.orders.common.OrderStrategyType.SINGLE)\
+                .set_order_strategy_type(tda.orders.common.OrderStrategyType.SINGLE) \
                 .set_special_instruction(tda.orders.common.SpecialInstruction.ALL_OR_NONE)
 
         if not debugCanSendOrders:
@@ -192,3 +193,41 @@ class Api:
 
         # throws error if cant cancel (code 400 - 404)
         assert r.status_code == 200, r.raise_for_status()
+
+    def checkAccountHasEnoughToCover(self, asset, amountWillBuyBack, amountToCover, optionStrikeToCover, optionDateToCover):
+        # we check here if the user has
+        # amountOfHundreds * 100 shares or amountOfHundreds options lower than new strike in acc (and further out)
+        # this also covers the risk of overselling when we ran into early assignment
+        r = self.connectClient.get_account(ameritradeAccountId, fields=tda.client.Client.Account.Fields.POSITIONS)
+
+        assert r.status_code == 200, r.raise_for_status()
+
+        data = r.json()
+        # set to this instead of 0 because we ignore the amount of options the bot has sold itself, as we are buying them back
+        coverage = amountWillBuyBack
+
+        try:
+            for position in data['securitiesAccount']['positions']:
+                if position['instrument']['assetType'] == 'EQUITY' and position['instrument']['symbol'] == asset:
+                    amountOpen = int(position['longQuantity']) - int(position['shortQuantity'])
+
+                    # can be less than 0, removes coverage then
+                    coverage += math.floor(amountOpen / 100)
+
+                if position['instrument']['assetType'] == 'OPTION' and position['instrument']['underlyingSymbol'] == asset and position['instrument']['putCall'] == 'CALL':
+                    # todo get real strike and date (covering with options not working until then)
+                    strike = 99999
+                    optionDate = '2222-22-22'
+                    amountOpen = int(position['longQuantity']) - int(position['shortQuantity'])
+
+                    if amountOpen > 0 and (strike > optionStrikeToCover or optionDate < optionDateToCover):
+                        # we cant cover with this, so we dont add it to coverage if its positive,
+                        # but we substract when negative
+                        continue
+
+                    coverage += amountOpen
+
+            return coverage >= amountToCover
+
+        except KeyError:
+            return alert.botFailed(None, 'Error while checking account coverage of asset ' + asset)

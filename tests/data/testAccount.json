@@ -1,0 +1,68 @@
+{
+  "securitiesAccount": {
+    "positions": [
+      {
+        "shortQuantity": 0.0,
+        "averagePrice": 0.0,
+        "currentDayCost": 0.0,
+        "currentDayProfitLoss": 0.0,
+        "currentDayProfitLossPercentage": 0.0,
+        "longQuantity": 100.0,
+        "settledLongQuantity": 0.0,
+        "settledShortQuantity": 0.0,
+        "instrument": {
+          "assetType": "EQUITY",
+          "cusip": "111111",
+          "symbol": "QQQ"
+        },
+        "marketValue": 0.0,
+        "maintenanceRequirement": 0.0,
+        "previousSessionLongQuantity": 0.0
+      },
+      {
+        "shortQuantity": 2.0,
+        "averagePrice": 0.0,
+        "currentDayCost": 0.0,
+        "currentDayProfitLoss": 0.0,
+        "currentDayProfitLossPercentage": 0.0,
+        "longQuantity": 0.0,
+        "settledLongQuantity": 0.0,
+        "settledShortQuantity": 0.0,
+        "instrument": {
+          "assetType": "OPTION",
+          "cusip": "11111",
+          "symbol": "QQQ_TESTC400",
+          "description": "TEST Call",
+          "type": "VANILLA",
+          "putCall": "CALL",
+          "underlyingSymbol": "QQQ"
+        },
+        "marketValue": 0.0,
+        "maintenanceRequirement": 0.0,
+        "previousSessionShortQuantity": 0.0
+      },
+       {
+        "shortQuantity": 0.0,
+        "averagePrice": 0.0,
+        "currentDayCost": 0.0,
+        "currentDayProfitLoss": 0.0,
+        "currentDayProfitLossPercentage": 0.0,
+        "longQuantity": 1.0,
+        "settledLongQuantity": 0.0,
+        "settledShortQuantity": 0.0,
+        "instrument": {
+          "assetType": "OPTION",
+          "cusip": "11111",
+          "symbol": "QQQ_TESTC300",
+          "description": "TEST Call",
+          "type": "VANILLA",
+          "putCall": "CALL",
+          "underlyingSymbol": "QQQ"
+        },
+        "marketValue": 0.0,
+        "maintenanceRequirement": 0.0,
+        "previousSessionShortQuantity": 0.0
+      }
+    ]
+  }
+}

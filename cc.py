@@ -101,9 +101,13 @@ def writeCcs(api):
             existing = None
 
         if (existing and needsRolling(existing)) or not existing:
+            amountToSell = configuration[asset]['amountOfHundreds']
+
             if existing:
+                amountToBuyBack = existing['count']
                 existingPremium = api.getATMPrice(existing['optionSymbol'])
             else:
+                amountToBuyBack = 0
                 existingPremium = 0
 
             new = cc.findNew(api, existing, existingPremium)
@@ -111,10 +115,11 @@ def writeCcs(api):
             print('The bot wants to write the following contract:')
             print(new)
 
-            # for better safety we could check here if user has
-            # amountOfHundreds * 100 shares or amountOfHundreds options lower than new strike in acc (and further out)
+            if not api.checkAccountHasEnoughToCover(asset, amountToBuyBack, amountToSell, new['contract']['strike'], new['date']):
+                return alert.botFailed(asset, 'The account doesn\'t have enough shares or options to cover selling '
+                                       + str(amountToSell) + ' cc(\'s)')
 
-            writeCc(api, asset, new, existing, existingPremium)
+            writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell)
         else:
             print('Nothing to write ...')
 
@@ -130,7 +135,7 @@ def needsRolling(cc):
     return nowPlusOffset >= cc['expiration']
 
 
-def writeCc(api, asset, new, existing, existingPremium, retry=0):
+def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry=0):
     maxRetries = configuration[asset]['allowedPriceReductionPercent']
     # lower the price by 1% for each retry if we couldn't get filled
     orderPricePercentage = 100 - retry
@@ -139,15 +144,12 @@ def writeCc(api, asset, new, existing, existingPremium, retry=0):
         return alert.botFailed(asset, 'Order cant be filled, tried with ' + str(orderPricePercentage) + '% of the price.')
 
     if existing and existingPremium:
-        # we use the db count here to prevent buying back more than we must if the amount in the configuration has changed
-        amountToBuyBack = existing['count']
-
         orderId = api.writeNewContracts(
             existing['optionSymbol'],
             amountToBuyBack,
             existingPremium,
             new['contract']['symbol'],
-            configuration[asset]['amountOfHundreds'],
+            amountToSell,
             new['projectedPremium'],
             orderPricePercentage
         )
@@ -157,7 +159,7 @@ def writeCc(api, asset, new, existing, existingPremium, retry=0):
             0,
             0,
             new['contract']['symbol'],
-            configuration[asset]['amountOfHundreds'],
+            amountToSell,
             new['projectedPremium'],
             orderPricePercentage
         )
@@ -185,13 +187,13 @@ def writeCc(api, asset, new, existing, existingPremium, retry=0):
         api.cancelOrder(orderId)
 
         print('Cant fill order, retrying with lower price ...')
-        return writeCc(api, asset, new, existing, existingPremium, retry + 1)
+        return writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry + 1)
 
     soldOption = {
         'stockSymbol': asset,
         'optionSymbol': new['contract']['symbol'],
         'expiration': new['date'],
-        'count': configuration[asset]['amountOfHundreds'],
+        'count': amountToSell,
         'strike': new['contract']['strike'],
         'receivedPremium': checkedOrder['price']
     }
@@ -204,9 +206,9 @@ def writeCc(api, asset, new, existing, existingPremium, retry=0):
     db.close()
 
     if existing:
-        alert.alert(asset, 'Bought back ' + str(existing['count']) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(configuration[asset]['amountOfHundreds']) + 'x ' +
+        alert.alert(asset, 'Bought back ' + str(amountToBuyBack) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(amountToSell) + 'x ' +
                     new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
     else:
-        alert.alert(asset, 'Sold ' + str(configuration[asset]['amountOfHundreds']) + 'x ' + new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
+        alert.alert(asset, 'Sold ' + str(amountToSell) + 'x ' + new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
 
     return soldOption

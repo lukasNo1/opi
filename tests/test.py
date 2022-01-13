@@ -46,6 +46,29 @@ class MockApi:
     def cancelOrder(self, orderId):
         pass
 
+    def checkAccountHasEnoughToCover(self, asset, amountWillBuyBack, amountToCover, optionStrikeToCover, optionDateToCover):
+        return True
+
+
+class MockResponse:
+    def __init__(self, data, status_code):
+        self.data = data
+        self.status_code = status_code
+
+    def json(self):
+        return self.data
+
+
+class MockConnectClientCoverageApi:
+    def get_account(self, account_id=None, fields=None):
+        f = open('data/testAccount.json')
+
+        data = json.load(f)
+
+        f.close()
+
+        return MockResponse(data, 200)
+
 
 mockConfig = {
     'QQQ': {
@@ -107,6 +130,17 @@ class ApiTestCase(unittest.TestCase):
 
         cc.writeCcs(apiObj)
         os.remove(dbName)
+
+    @patch('api.Api.connectClient', MockConnectClientCoverageApi)
+    @patch('alert.botAlert', 'console')
+    @patch('api.ameritradeAccountId', '11111')
+    def test_coverage_api(self):
+        apiObj = api.Api('123', '456')
+
+        # test acc has 100 shares and 1 itm call
+        ret = apiObj.checkAccountHasEnoughToCover('QQQ', 2, 2, 410.0, '2021-11-23')
+
+        assert ret == True
 
 
 unittest.main()

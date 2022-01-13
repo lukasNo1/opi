@@ -14,7 +14,7 @@ This bot seeks to generate passive income from option premiums through writing c
 
 The bot will sell a covered call each month on the assets you select
 
-The covered call will always be the first OTM call (current asset price + 1$, adjustable in the configuration for more growth)
+The covered call will be the first OTM call per default (current asset price + 1$, adjustable in the configuration for more growth)
 
 The bot buys back (rolls) the option contract each month, one day before expiration
 
@@ -22,9 +22,9 @@ The bot buys back (rolls) the option contract each month, one day before expirat
 
 You need to own at least 100 of the underlying asset you want the bot to sell the covered calls on
 
-Alternatively you can also hold a deep ITM call option (LEAP) representing said asset
+Alternatively you can also hold an ITM call option (preferably deep ITM LEAP) representing said asset
 
-(ATTENTION! the bot does not check if you actually have the amount you say you have in the configuration)
+The bot will check if you actually have enough shares or options in the account to cover the cc's
 
 ---
 

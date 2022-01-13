@@ -7,6 +7,7 @@ from configuration import ameritradeAccountId, debugCanSendOrders
 import datetime
 from statistics import median
 import alert
+from support import validDateFormat
 
 
 class Api:
@@ -215,9 +216,9 @@ class Api:
                     coverage += math.floor(amountOpen / 100)
 
                 if position['instrument']['assetType'] == 'OPTION' and position['instrument']['underlyingSymbol'] == asset and position['instrument']['putCall'] == 'CALL':
-                    # todo get real strike and date (covering with options not working until then)
-                    strike = 99999
-                    optionDate = '2222-22-22'
+                    optionData = self.getOptionExpirationDateAndStrike(position['instrument']['symbol'])
+                    strike = optionData['strike']
+                    optionDate = optionData['expiration']
                     amountOpen = int(position['longQuantity']) - int(position['shortQuantity'])
 
                     if amountOpen > 0 and (strike > optionStrikeToCover or optionDate < optionDateToCover):
@@ -230,4 +231,27 @@ class Api:
             return coverage >= amountToCover
 
         except KeyError:
-            return alert.botFailed(None, 'Error while checking account coverage of asset ' + asset)
+            return alert.botFailed(asset, 'Error while checking the account coverage')
+
+    def getOptionExpirationDateAndStrike(self, asset):
+        r = self.connectClient.get_quote(asset)
+
+        assert r.status_code == 200, r.raise_for_status()
+
+        data = r.json()
+
+        try:
+            year = str(data[asset]['expirationYear'])
+            month = str(data[asset]['expirationMonth']).zfill(2)
+            day = str(data[asset]['expirationDay']).zfill(2)
+            expiration = year + '-' + month + '-' + day
+
+            if not validDateFormat(expiration):
+                return alert.botFailed(asset, 'Incorrect date format from api: ' + expiration)
+
+            return {
+                'strike': data[asset]['strikePrice'],
+                'expiration': expiration
+            }
+        except KeyError:
+            return alert.botFailed(asset, 'Wrong data from api when getting option expiry data')

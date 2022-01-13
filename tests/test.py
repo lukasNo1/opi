@@ -69,6 +69,15 @@ class MockConnectClientCoverageApi:
 
         return MockResponse(data, 200)
 
+    def get_quote(self,symbol=None):
+        f = open('data/testQuoteQqqOption.json')
+
+        data = json.load(f)
+
+        f.close()
+
+        return MockResponse(data, 200)
+
 
 mockConfig = {
     'QQQ': {
@@ -138,9 +147,14 @@ class ApiTestCase(unittest.TestCase):
         apiObj = api.Api('123', '456')
 
         # test acc has 100 shares and 1 itm call
-        ret = apiObj.checkAccountHasEnoughToCover('QQQ', 2, 2, 410.0, '2021-11-23')
+        ret = apiObj.checkAccountHasEnoughToCover('QQQ', 2, 3, 410.0, '2021-11-23')
+        assert ret == False
 
+        ret = apiObj.checkAccountHasEnoughToCover('QQQ', 2, 2, 410.0, '2021-11-23')
         assert ret == True
+
+        ret = apiObj.checkAccountHasEnoughToCover('QQQ', 2, 2, 410.0, '2222-22-22')
+        assert ret == False
 
 
 unittest.main()

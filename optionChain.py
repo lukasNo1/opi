@@ -1,5 +1,5 @@
 from statistics import median
-import datetime
+from support import validDateFormat
 import alert
 
 
@@ -29,7 +29,7 @@ class OptionChain:
                 date = split[0]
                 days = int(split[1])
 
-                if not self.validDateFormat(date):
+                if not validDateFormat(date):
                     return alert.botFailed(self.asset, 'Incorrect date format from api: ' + date)
 
                 contracts = []
@@ -87,10 +87,3 @@ class OptionChain:
 
         return None
 
-    def validDateFormat(self, date):
-        try:
-            datetime.datetime.strptime(date, '%Y-%m-%d')
-
-            return True
-        except ValueError:
-            return False

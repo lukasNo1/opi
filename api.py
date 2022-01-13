@@ -221,7 +221,7 @@ class Api:
                     optionDate = optionData['expiration']
                     amountOpen = int(position['longQuantity']) - int(position['shortQuantity'])
 
-                    if amountOpen > 0 and (strike > optionStrikeToCover or optionDate < optionDateToCover):
+                    if amountOpen > 0 and (strike >= optionStrikeToCover or optionDate < optionDateToCover):
                         # we cant cover with this, so we dont add it to coverage if its positive,
                         # but we substract when negative
                         continue

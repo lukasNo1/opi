@@ -104,9 +104,11 @@ def writeCcs(api):
             amountToSell = configuration[asset]['amountOfHundreds']
 
             if existing:
+                existingSymbol = existing['optionSymbol']
                 amountToBuyBack = existing['count']
                 existingPremium = api.getATMPrice(existing['optionSymbol'])
             else:
+                existingSymbol = None
                 amountToBuyBack = 0
                 existingPremium = 0
 
@@ -115,7 +117,7 @@ def writeCcs(api):
             print('The bot wants to write the following contract:')
             print(new)
 
-            if not api.checkAccountHasEnoughToCover(asset, amountToBuyBack, amountToSell, new['contract']['strike'], new['date']):
+            if not api.checkAccountHasEnoughToCover(asset, existingSymbol, amountToBuyBack, amountToSell, new['contract']['strike'], new['date']):
                 return alert.botFailed(asset, 'The account doesn\'t have enough shares or options to cover selling '
                                        + str(amountToSell) + ' cc(\'s)')
 

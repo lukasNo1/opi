@@ -195,15 +195,19 @@ class Api:
         # throws error if cant cancel (code 400 - 404)
         assert r.status_code == 200, r.raise_for_status()
 
-    def checkAccountHasEnoughToCover(self, asset, amountWillBuyBack, amountToCover, optionStrikeToCover, optionDateToCover):
+    def checkAccountHasEnoughToCover(self, asset, existingSymbol, amountWillBuyBack, amountToCover, optionStrikeToCover, optionDateToCover):
         # we check here if the user has
         # amountOfHundreds * 100 shares or amountOfHundreds options lower than new strike in acc (and further out)
-        # this also covers the risk of overselling when we ran into early assignment
         r = self.connectClient.get_account(ameritradeAccountId, fields=tda.client.Client.Account.Fields.POSITIONS)
 
         assert r.status_code == 200, r.raise_for_status()
 
         data = r.json()
+
+        if existingSymbol and not self.checkPreviousSoldCcsStillHere(existingSymbol, amountWillBuyBack, data):
+            # something bad happened, let the user know he needs to look into it
+            return alert.botFailed(asset, 'The cc\'s the bot wants to buy back aren\'t in the account anymore, manual review required.')
+
         # set to this instead of 0 because we ignore the amount of options the bot has sold itself, as we are buying them back
         coverage = amountWillBuyBack
 
@@ -232,6 +236,23 @@ class Api:
 
         except KeyError:
             return alert.botFailed(asset, 'Error while checking the account coverage')
+
+    def checkPreviousSoldCcsStillHere(self, asset, amount, data):
+        """
+        Check if we still have the amount of cc's we sold in the account
+        If not, then something bad happened like early assignment f.ex.
+        """
+        try:
+            for position in data['securitiesAccount']['positions']:
+                if position['instrument']['symbol'] == asset:
+                    # we allow there to be MORE sold of this option but not less
+                    # Useful f.ex. if someone wants to manually sell more (independent of the bot)
+                    return position['shortQuantity'] >= amount and position['longQuantity'] == 0
+
+            return False
+
+        except KeyError:
+            return False
 
     def getOptionExpirationDateAndStrike(self, asset):
         r = self.connectClient.get_quote(asset)

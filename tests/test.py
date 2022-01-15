@@ -4,7 +4,6 @@ import api
 import json
 import cc
 import os
-import alert
 
 from tinydb import TinyDB
 
@@ -23,7 +22,7 @@ class MockApi:
         return 404
 
     def getOptionChain(self, asset, strikes, date, daysLessAllowed):
-        f = open('data/testChain.json')
+        f = open('data/test_chain.json')
 
         data = json.load(f)
 
@@ -49,6 +48,15 @@ class MockApi:
     def checkAccountHasEnoughToCover(self, asset, existingSymbol, amountWillBuyBack, amountToCover, optionStrikeToCover, optionDateToCover):
         return True
 
+class MockApi2(MockApi):
+    def getOptionChain(self, asset, strikes, date, daysLessAllowed):
+        f = open('data/test_chain_roll_without_debit_min_yield.json')
+
+        data = json.load(f)
+
+        f.close()
+
+        return data
 
 class MockResponse:
     def __init__(self, data, status_code):
@@ -61,7 +69,7 @@ class MockResponse:
 
 class MockConnectClientCoverageApi:
     def get_account(self, account_id=None, fields=None):
-        f = open('data/testAccount.json')
+        f = open('data/test_account.json')
 
         data = json.load(f)
 
@@ -70,7 +78,7 @@ class MockConnectClientCoverageApi:
         return MockResponse(data, 200)
 
     def get_quote(self, symbol=None):
-        f = open('data/testQuoteQqqOption.json')
+        f = open('data/test_quote_oqq_option.json')
 
         data = json.load(f)
 
@@ -107,34 +115,36 @@ dbName = 'testdb.json'
 
 
 class ApiTestCase(unittest.TestCase):
-    # @patch('api.Api', MockApi)
-    # @patch.dict('cc.configuration', mockConfig)
-    # @patch('cc.dbName', dbName)
-    # @patch('alert.botAlert', 'console')
-    # def test_everything(self):
-    #     apiObj = api.Api('123', '456')
-    #
-    #     cc.writeCcs(apiObj)
-    #     os.remove(dbName)
-    #
-    # @patch('api.Api', MockApi)
-    # @patch.dict('cc.configuration', mockConfigTest2)
-    # @patch('cc.dbName', dbName)
-    # @patch('alert.botAlert', 'console')
-    # def test_roll_without_debit_min_yield(self):
-    #     apiObj = api.Api('123', '456')
-    #
-    #     # existing contract in db with ITM strike 400 and premium 8.00
-    #     db = TinyDB(dbName)
-    #     db.insert(mockDBTest2)
-    #     db.close()
-    #
-    #     # bot wants to write 405 but only gives 7.00 premium
-    #     # runs into second function which should return the highest strike
-    #     # between 400 - 405 which gives 8.00 premium = 404
-    #
-    #     cc.writeCcs(apiObj)
-    #     os.remove(dbName)
+    @patch('api.Api', MockApi)
+    @patch.dict('cc.configuration', mockConfig)
+    @patch('cc.dbName', dbName)
+    @patch('alert.botAlert', 'console')
+    def test_everything(self):
+        apiObj = api.Api('123', '456')
+
+        cc.writeCcs(apiObj)
+        os.remove(dbName)
+
+    @patch('api.Api', MockApi2)
+    @patch.dict('cc.configuration', mockConfigTest2)
+    @patch('cc.dbName', dbName)
+    @patch('alert.botAlert', 'console')
+    def test_roll_without_debit_min_yield(self):
+        apiObj = api.Api('123', '456')
+
+        # existing contract in db with ITM strike 400 and premium 8.00
+        db = TinyDB(dbName)
+        db.insert(mockDBTest2)
+        db.close()
+
+
+
+        # bot wants to write 405 but only gives 7.00 premium
+        # runs into second function which should return the highest strike
+        # between 400 - 405 which gives 8.00 premium = 404
+
+        cc.writeCcs(apiObj)
+        os.remove(dbName)
 
     @patch('api.Api.connectClient', MockConnectClientCoverageApi)
     @patch('alert.botAlert', 'console')

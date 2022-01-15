@@ -28,8 +28,8 @@ class Cc:
 
         # get closest chain to days
         # it will get friday most of the time, but if a friday is a holiday f.ex. the chain will only return a thursday date chain
-        # todo we could just get chain[-1] if we can insure its sorted
-        closestChain = min(chain, key=lambda x: abs(x['days'] - newccExpDate.day))
+        # todo insure its sorted
+        closestChain = chain[-1]
 
         minStrike = configuration[asset]['minStrike']
         atmPrice = api.getATMPrice(asset)

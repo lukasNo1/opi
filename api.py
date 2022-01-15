@@ -52,12 +52,9 @@ class Api:
 
         return lastPrice
 
-    def getOptionChain(self, asset, strikes, days, daysSpread):
-        now = datetime.datetime.utcnow()
-        now = now.replace(tzinfo=datetime.timezone.utc)
-
-        fromDate = now + datetime.timedelta(days=days - daysSpread)
-        toDate = now + datetime.timedelta(days=days + daysSpread)
+    def getOptionChain(self, asset, strikes, date, daysLessAllowed):
+        fromDate = date - datetime.timedelta(days=daysLessAllowed)
+        toDate = date
 
         r = self.connectClient.get_option_chain(
             asset,

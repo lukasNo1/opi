@@ -18,12 +18,6 @@ configuration = {
         # don't write cc's with strikes below this value
         'minStrike': 0,
 
-        # write cc's around this far out, bot gets the nearest contract possible
-        'days': 30,
-
-        # allow x days less or more
-        'daysSpread': 10,
-
         # only write that cc if you can get this value or above in premium
         'minYield': 3.00,
 

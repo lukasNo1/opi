@@ -39,12 +39,6 @@ The bot will check if you actually have enough shares or options in the account 
     # don't write cc's with strikes below this value
     'minStrike': 0,
 
-    # write cc's around this far out, bot gets the nearest contract possible
-    'days': 30,
-
-    # allow x days less or more
-    'daysSpread': 10,
-
     # only write that cc if you can get this value or above in premium
     'minYield': 3.00,
 
@@ -59,6 +53,11 @@ The bot will inform you about important events either directly in the console or
 
 (For emails you need to add credentials for a smtp server in configuration.py and set the 'botAlert' setting to "email")
 
+### CC expiration date
+
+The bot will try to sell a cc which expires on the third friday of next month.
+If that date is not available because it falls on a holiday f.ex., it will sell a cc with expiration on thursday preceding said friday
+
 ### Rollups: Further explanation
 
 A 'rollup' is the process of rolling to a higher strike price than the current one.
@@ -71,11 +70,6 @@ if the asset price went up.
 If `rollWithoutDebit` is enabled, the bot will roll to a contract with the strike being the ATM price + `minGapToATM` (normal behavior).
 
 If that results in debit, it rolls to the highest possible contract with credit instead (current cc strike price as minimum)
-
-### Hardcoded rules
-
-- Options with expiration dates below 3 days out are not allowed and will fail
-    - So `days` - `daysSpread` must always amount to 3 or more for the bot to work
 
 ### Risks
 

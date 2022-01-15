@@ -5,6 +5,7 @@ from tinydb import TinyDB, Query
 import datetime
 import time
 import alert
+import support
 
 
 class Cc:
@@ -15,30 +16,24 @@ class Cc:
     def findNew(self, api, existing, existingPremium):
         asset = self.asset
 
-        optionChain = OptionChain(api, asset, configuration[asset]['days'], configuration[asset]['daysSpread'])
+        newccExpDate = support.getNewCcExpirationDate()
+
+        # get option chain of third thursday and friday of the month
+        optionChain = OptionChain(api, asset, newccExpDate, 1)
 
         chain = optionChain.get()
 
         if not chain:
-            return alert.botFailed(asset, 'No chain found within given days range')
+            return alert.botFailed(asset, 'No chain found on the third thursday OR friday')
 
         # get closest chain to days
-        closestChain = min(chain, key=lambda x: abs(x['days'] - configuration[asset]['days']))
-
-        # note: if the days or days - daysSpread in configuration amount to less than 3, date will always be too close
-        # (with daysSpread only if it round down instead of up to get the best contract)
-
-        # other than the 3 days check, this isn't really necessary as it already gets filtered in the api, but better to be sure
-        dateTooClose = closestChain['days'] < 3 or abs(closestChain['days'] - configuration[asset]['days']) < -configuration[asset]['daysSpread']
-        dateTooFar = abs(closestChain['days'] - configuration[asset]['days']) > configuration[asset]['daysSpread']
+        # it will get friday most of the time, but if a friday is a holiday f.ex. the chain will only return a thursday date chain
+        # todo we could just get chain[-1] if we can insure its sorted
+        closestChain = min(chain, key=lambda x: abs(x['days'] - newccExpDate.day))
 
         minStrike = configuration[asset]['minStrike']
         atmPrice = api.getATMPrice(asset)
         strikePrice = atmPrice + configuration[asset]['minGapToATM']
-
-        # check if its within the spread
-        if dateTooClose or dateTooFar:
-            return alert.botFailed(asset, 'No contract found within given days range')
 
         if existing and configuration[asset]['rollWithoutDebit']:
             # prevent paying debit with setting the minYield to the current price of existing

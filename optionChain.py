@@ -6,14 +6,14 @@ import alert
 class OptionChain:
     strikes = 24
 
-    def __init__(self, api, asset, days, daysSpread):
+    def __init__(self, api, asset, date, daysLessAllowed):
         self.api = api
         self.asset = asset
-        self.days = days
-        self.daysSpread = daysSpread
+        self.date = date
+        self.daysLessAllowed = daysLessAllowed
 
     def get(self):
-        apiData = self.api.getOptionChain(self.asset, self.strikes, self.days, self.daysSpread)
+        apiData = self.api.getOptionChain(self.asset, self.strikes, self.date, self.daysLessAllowed)
 
         return self.mapApiData(apiData)
 

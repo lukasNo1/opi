@@ -55,6 +55,9 @@ class OptionChain:
         except KeyError:
             return alert.botFailed(self.asset, 'Wrong data from api')
 
+        if map:
+            map = sorted(map, key=lambda d: d['days'])
+
         return map
 
     def sortDateChain(self, chain):
@@ -86,4 +89,3 @@ class OptionChain:
                 return contract
 
         return None
-

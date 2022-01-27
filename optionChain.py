@@ -4,7 +4,7 @@ import alert
 
 
 class OptionChain:
-    strikes = 24
+    strikes = 100
 
     def __init__(self, api, asset, date, daysLessAllowed):
         self.api = api

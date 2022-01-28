@@ -21,7 +21,7 @@ configuration = {
         # only write that cc if you can get this value or above in premium (per contract)
         'minYield': 3.00,
 
-        # prevent paying for rollups (can ignore minGapToATM, minStrike and minYield!)
+        # prevent paying for rollups (can override minGapToATM, minStrike and minYield!)
         'rollWithoutDebit': True,
 
         # if we can't get filled on an order, how much is the bot allowed to

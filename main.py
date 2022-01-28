@@ -4,6 +4,7 @@ from configuration import apiKey, apiRedirectUri, debugMarketOpen
 from api import Api
 import datetime
 import alert
+import support
 
 api = Api(apiKey, apiRedirectUri)
 
@@ -14,12 +15,15 @@ try:
         api.connect()
 
         execWindow = api.getOptionExecutionWindow()
+        waitTime = support.getDeltaDiffNowTomorrow1Am()
 
         if debugMarketOpen or execWindow['open']:
             print('Market open, running the program now ...')
             writeCcs(api)
 
-            time.sleep(defaultWaitTime)
+            print('All done. Rechecking tomorrow (in %s)' % waitTime)
+
+            time.sleep(waitTime.total_seconds())
         else:
             if execWindow['openDate']:
                 print('Waiting for last market hour ...')
@@ -31,8 +35,10 @@ try:
                     time.sleep(delta.total_seconds())
                 else:
                     # we are past open date, but the market is not open
-                    print('Market closed already. Rechecking in 1 hour ...')
-                    time.sleep(defaultWaitTime)
+
+                    print('Market closed already. Rechecking tomorrow (in %s)' % waitTime)
+
+                    time.sleep(waitTime.total_seconds())
 
             else:
                 print('The market is closed today, rechecking in 1 hour ...')

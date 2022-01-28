@@ -47,7 +47,7 @@ class Cc:
         contract = optionChain.getContractFromDateChain(strikePrice, closestChain['contracts'])
 
         if not contract:
-            return alert.botFailed(asset, 'minStrike')
+            return alert.botFailed(asset, 'No contract over minStrike found')
 
         # check minYield
         projectedPremium = median([contract['bid'], contract['ask']])

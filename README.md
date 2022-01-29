@@ -83,3 +83,6 @@ Do not use this bot with assets that have low volatility or too few options
 
 **Selling free contracts** - It should be obvious, but do not set the `allowedPriceReductionPercent` config to 100 as that can result in a 100% price reduction
 which allows the bot to give away the options for free.
+
+### Quick analysis: Is this a drop in replacement for covered call ETFs (like QYLD)?
+If you're interested: [Analysis](misc/qyld_analysis.md)

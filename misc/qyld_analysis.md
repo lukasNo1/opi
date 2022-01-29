@@ -19,7 +19,7 @@ The bot follows the same basic principles as QYLD, but has some important differ
 
    QYLD's options are also liquidated on the day before expiration, but at market open. Also it happens automatically (they sell AM european-style options)
 
-4. This bot will sell a new covered call at the same time it buys the expiring ones back, QYLD sells new contracs only on monday after expiry date
+4. This bot will sell a new covered call at the same time it buys the expiring one's back, QYLD sells new contracts only on monday after expiry date
 
 5. Expense ratio with the bot: 0%, with QYLD: 0.60% at the time of writing
 

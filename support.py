@@ -5,8 +5,10 @@ from tinydb import TinyDB
 import alert
 from configuration import dbName
 
-defaultWaitTime = 3600
+# how many days before expiration we close the contracts
+ccExpDaysOffset = 1
 
+defaultWaitTime = 3600
 
 def validDateFormat(date):
     try:
@@ -60,18 +62,17 @@ def getDeltaDiffNowNearestExpirationDate():
     db.close()
 
     if not soldCalls:
-        return defaultWaitTime
+        return alert.botFailed(None, 'Tried to get expiration dates, but there are no sold calls in the database.')
 
     soldCalls = sorted(soldCalls, key=lambda d: d['expiration'])
 
     now = datetime.datetime.utcnow()
 
     if now.strftime('%Y-%m-%d') >= soldCalls[0]['expiration']:
-        # something's wrong, we should have rolled this call (this should never happen)
+        # This call should've been rolled (this should never happen)
         return alert.botFailed(None, 'Unrolled cc found in database, manual review required.')
 
-    # minus one day, because we need to run the bot the day before expiration
-    expDate = datetime.datetime.strptime(soldCalls[0]['expiration'], '%Y-%m-%d') - datetime.timedelta(days=1)
+    expDate = datetime.datetime.strptime(soldCalls[0]['expiration'], '%Y-%m-%d') - datetime.timedelta(days=ccExpDaysOffset)
 
     delta = expDate - now
 

@@ -125,8 +125,7 @@ def needsRolling(cc):
         return True
 
     # needs rolling on date BEFORE expiration (if the market is closed, it will trigger ON expiration date)
-    daysOffset = 1
-    nowPlusOffset = (datetime.datetime.utcnow() + datetime.timedelta(days=daysOffset)).strftime('%Y-%m-%d')
+    nowPlusOffset = (datetime.datetime.utcnow() + datetime.timedelta(days=support.ccExpDaysOffset)).strftime('%Y-%m-%d')
 
     return nowPlusOffset >= cc['expiration']
 

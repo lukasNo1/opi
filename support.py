@@ -1,5 +1,11 @@
 import datetime
 from dateutil.relativedelta import relativedelta
+from tinydb import TinyDB
+
+import alert
+from configuration import dbName
+
+defaultWaitTime = 3600
 
 
 def validDateFormat(date):
@@ -41,8 +47,32 @@ def getThirdFridayOfMonth(monthDate):
 def getDeltaDiffNowTomorrow1Am():
     now = datetime.datetime.utcnow()
 
-    tomorrow = datetime.datetime.combine(now.date(), datetime.time(0, 0)) + datetime.timedelta(days=1,hours=1)
+    tomorrow = datetime.datetime.combine(now.date(), datetime.time(0, 0)) + datetime.timedelta(days=1, hours=1)
 
     delta = tomorrow - now
+
+    return delta
+
+
+def getDeltaDiffNowNearestExpirationDate():
+    db = TinyDB(dbName)
+    soldCalls = db.all()
+    db.close()
+
+    if not soldCalls:
+        return defaultWaitTime
+
+    soldCalls = sorted(soldCalls, key=lambda d: d['expiration'])
+
+    now = datetime.datetime.utcnow()
+
+    if now.strftime('%Y-%m-%d') >= soldCalls[0]['expiration']:
+        # something's wrong, we should have rolled this call (this should never happen)
+        return alert.botFailed(None, 'Unrolled cc found in database, manual review required.')
+
+    # minus one day, because we need to run the bot the day before expiration
+    expDate = datetime.datetime.strptime(soldCalls[0]['expiration'], '%Y-%m-%d') - datetime.timedelta(days=1)
+
+    delta = expDate - now
 
     return delta

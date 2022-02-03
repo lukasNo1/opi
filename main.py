@@ -8,20 +8,20 @@ import support
 
 api = Api(apiKey, apiRedirectUri)
 
-defaultWaitTime = 3600
-
 try:
     while True:
         api.connect()
 
         execWindow = api.getOptionExecutionWindow()
-        waitTime = support.getDeltaDiffNowTomorrow1Am()
 
         if debugMarketOpen or execWindow['open']:
             print('Market open, running the program now ...')
             writeCcs(api)
 
-            print('All done. Rechecking tomorrow (in %s)' % waitTime)
+            # gets diff to nearest expiration date -1, fallback to defaultWaitTime
+            waitTime = support.getDeltaDiffNowNearestExpirationDate()
+
+            print('All done. Running again in %s' % waitTime)
 
             time.sleep(waitTime.total_seconds())
         else:
@@ -35,6 +35,7 @@ try:
                     time.sleep(delta.total_seconds())
                 else:
                     # we are past open date, but the market is not open
+                    waitTime = support.getDeltaDiffNowTomorrow1Am()
 
                     print('Market closed already. Rechecking tomorrow (in %s)' % waitTime)
 
@@ -42,6 +43,6 @@ try:
 
             else:
                 print('The market is closed today, rechecking in 1 hour ...')
-                time.sleep(defaultWaitTime)
+                time.sleep(support.defaultWaitTime)
 except Exception as e:
     alert.botFailed(None, 'Uncaught exception: ' + str(e))

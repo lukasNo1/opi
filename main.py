@@ -18,8 +18,7 @@ try:
             print('Market open, running the program now ...')
             writeCcs(api)
 
-            # gets diff to nearest expiration date -1
-            waitTime = support.getDeltaDiffNowNearestExpirationDate()
+            waitTime = support.getDeltaDiffNowNextRollDate1Am()
 
             print('All done. Running again in %s' % waitTime)
 

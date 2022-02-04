@@ -56,7 +56,7 @@ def getDeltaDiffNowTomorrow1Am():
     return delta
 
 
-def getDeltaDiffNowNearestExpirationDate():
+def getDeltaDiffNowNextRollDate1Am():
     db = TinyDB(dbName)
     soldCalls = db.all()
     db.close()
@@ -72,7 +72,7 @@ def getDeltaDiffNowNearestExpirationDate():
         # This call should've been rolled (this should never happen)
         return alert.botFailed(None, 'Unrolled cc found in database, manual review required.')
 
-    expDate = datetime.datetime.strptime(soldCalls[0]['expiration'], '%Y-%m-%d') - datetime.timedelta(days=ccExpDaysOffset)
+    expDate = datetime.datetime.strptime(soldCalls[0]['expiration'], '%Y-%m-%d') - datetime.timedelta(days=ccExpDaysOffset) + datetime.timedelta(hours=1)
 
     delta = expDate - now
 

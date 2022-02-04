@@ -21,7 +21,9 @@ The bot follows the same basic principles as QYLD, but has some important differ
 
 4. This bot will sell a new covered call at the same time it buys the expiring one's back, QYLD sells new contracts only on monday after expiry date
 
-5. Expense ratio with the bot: 0%, with QYLD: 0.60% at the time of writing
+5. The bot itself doesn't have any expenses. If you run the bot with QQQ shares, you have to pay the expense ratio of this ETF of 0.20%
+   
+   With QYLD the expense ratio is 0.60% at the time of writing
 
 The expiration dates on the cc's are the same.
 

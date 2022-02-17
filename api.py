@@ -154,8 +154,7 @@ class Api:
                 .set_session(tda.orders.common.Session.NORMAL) \
                 .set_price(price) \
                 .set_order_type(orderType) \
-                .set_order_strategy_type(tda.orders.common.OrderStrategyType.SINGLE) \
-                .set_special_instruction(tda.orders.common.SpecialInstruction.ALL_OR_NONE)
+                .set_order_strategy_type(tda.orders.common.OrderStrategyType.SINGLE)
 
         if not debugCanSendOrders:
             print(order.build())

@@ -130,7 +130,7 @@ class Api:
        """
 
         if oldSymbol is None:
-            price = newCredit * newAmount * (fullPricePercentage / 100)
+            price = newCredit * (fullPricePercentage / 100)
 
             # init a new position, sell to open
             order = tda.orders.options.option_sell_to_open_limit(newSymbol, newAmount, price) \

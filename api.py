@@ -102,22 +102,24 @@ class Api:
                     'nowDate': now
                 }
 
+            start = sessionHours['regularMarket'][0]['start']
+            start = datetime.datetime.fromisoformat(start)
             end = sessionHours['regularMarket'][0]['end']
-
             end = datetime.datetime.fromisoformat(end)
-            # execute during the last open hour
-            start = end - datetime.timedelta(hours=1)
 
-            if start <= now <= end:
+            # execute after 30 minutes to let volatility settle a bit and prevent exceptions due to api overload
+            windowStart = start + datetime.timedelta(minutes=30)
+
+            if windowStart <= now <= end:
                 return {
                     'open': True,
-                    'openDate': start,
+                    'openDate': windowStart,
                     'nowDate': now
                 }
             else:
                 return {
                     'open': False,
-                    'openDate': start,
+                    'openDate': windowStart,
                     'nowDate': now
                 }
         except (KeyError, TypeError, ValueError):
@@ -139,7 +141,14 @@ class Api:
                 .set_special_instruction(tda.orders.common.SpecialInstruction.ALL_OR_NONE)
         else:
             # roll
-            price = -((oldDebit * oldAmount - newCredit * newAmount) * (fullPricePercentage / 100))
+
+            if oldAmount != newAmount:
+                # custom order
+                price = -((oldDebit * oldAmount - newCredit * newAmount) * (fullPricePercentage / 100))
+            else:
+                # vertical, we ignore amount
+                price = -((oldDebit - newCredit) * (fullPricePercentage / 100))
+
             order = tda.orders.generic.OrderBuilder()
 
             orderType = tda.orders.common.OrderType.NET_CREDIT

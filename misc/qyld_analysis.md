@@ -15,9 +15,9 @@ The bot follows the same basic principles as QYLD, but has some important differ
    
    QYLD doesn't need to do that, because they sell cash settled options (meaning on expiration you don't get assigned shares, you just pay cash if they are ITM)
 
-3. This bot liquidates the cc's the day before expiration, 1 hour before close
+3. This bot liquidates the cc's the day before expiration, 30 minutes after market open
 
-   QYLD's options are also liquidated on the day before expiration, but at market open. Also it happens automatically (they sell AM european-style options)
+   QYLD's options are also liquidated on the day before expiration, but directly at market open. Also it happens automatically (they sell AM european-style options)
 
 4. This bot will sell a new covered call at the same time it buys the expiring one's back, QYLD sells new contracts only on monday after expiry date
 

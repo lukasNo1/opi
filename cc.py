@@ -182,6 +182,31 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
         api.cancelOrder(orderId)
 
         print('Cant fill order, retrying with lower price ...')
+
+        if checkedOrder['partialFills'] > 0:
+            if checkedOrder['complexOrderStrategyType'] is None or (checkedOrder['complexOrderStrategyType'] and checkedOrder['complexOrderStrategyType'] != 'DIAGONAL'):
+                # partial fills are only possible on DIAGONAL orders, so this should never happen
+                return alert.botFailed(asset, 'Partial fill on custom order, manual review required: ' + str(checkedOrder['partialFills']))
+
+            # on diagonal fill is per leg, 1 fill = 1 bought back and 1 sold
+
+            # quick verification, this should never be true
+            if not (amountToBuyBack == amountToSell and amountToBuyBack > checkedOrder['partialFills']):
+                print(amountToBuyBack)
+                print(amountToSell)
+                print(checkedOrder['partialFills'])
+                return alert.botFailed(asset, 'Partial fill amounts do not match, manual review required')
+
+            diagonalAmountBothWays = amountToBuyBack - checkedOrder['partialFills']
+
+            # todo update db
+
+            alert.alert(asset, 'Partial fill: Bought back ' + str(checkedOrder['partialFills']) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(
+                checkedOrder['partialFills']) + 'x ' +
+                        new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
+
+            return writeCc(api, asset, new, existing, existingPremium, diagonalAmountBothWays, diagonalAmountBothWays, retry + 1)
+
         return writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry + 1)
 
     soldOption = {

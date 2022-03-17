@@ -146,7 +146,7 @@ class Api:
                 # custom order
                 price = -((oldDebit * oldAmount - newCredit * newAmount) * (fullPricePercentage / 100))
             else:
-                # vertical, we ignore amount
+                # diagonal, we ignore amount
                 price = -((oldDebit - newCredit) * (fullPricePercentage / 100))
 
             order = tda.orders.generic.OrderBuilder()
@@ -182,16 +182,24 @@ class Api:
         assert r.status_code == 200, r.raise_for_status()
 
         data = r.json()
+        complexOrderStrategyType = None
 
         try:
             filled = data['status'] == 'FILLED'
             price = data['price']
+            partialFills = data['filledQuantity']
+
+            if 'complexOrderStrategyType' in data:
+                complexOrderStrategyType = data['complexOrderStrategyType']
+
         except KeyError:
             return alert.botFailed(None, 'Error while checking working order')
 
         return {
             'filled': filled,
-            'price': price
+            'price': price,
+            'partialFills': partialFills,
+            'complexOrderStrategyType': complexOrderStrategyType
         }
 
     def cancelOrder(self, orderId):

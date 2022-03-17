@@ -130,7 +130,7 @@ def needsRolling(cc):
     return nowPlusOffset >= cc['expiration']
 
 
-def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry=0):
+def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry=0, partialContractsSold=0):
     maxRetries = configuration[asset]['allowedPriceReductionPercent']
     # lower the price by 1% for each retry if we couldn't get filled
     orderPricePercentage = 100 - retry
@@ -192,28 +192,39 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
 
             # quick verification, this should never be true
             if not (amountToBuyBack == amountToSell and amountToBuyBack > checkedOrder['partialFills']):
-                print(amountToBuyBack)
-                print(amountToSell)
-                print(checkedOrder['partialFills'])
                 return alert.botFailed(asset, 'Partial fill amounts do not match, manual review required')
 
             diagonalAmountBothWays = amountToBuyBack - checkedOrder['partialFills']
-
-            # todo update db
 
             alert.alert(asset, 'Partial fill: Bought back ' + str(checkedOrder['partialFills']) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(
                 checkedOrder['partialFills']) + 'x ' +
                         new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
 
-            return writeCc(api, asset, new, existing, existingPremium, diagonalAmountBothWays, diagonalAmountBothWays, retry + 1)
+            return writeCc(api, asset, new, existing, existingPremium, diagonalAmountBothWays, diagonalAmountBothWays, retry + 1,
+                           partialContractsSold + checkedOrder['partialFills'])
 
-        return writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry + 1)
+        return writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry + 1, partialContractsSold)
+
+    if existing:
+        alert.alert(asset, 'Bought back ' + str(amountToBuyBack) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(amountToSell) + 'x ' +
+                    new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
+    else:
+        alert.alert(asset, 'Sold ' + str(amountToSell) + 'x ' + new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
+
+    if partialContractsSold > 0:
+        amountHasSold = partialContractsSold + amountToSell
+
+        # shouldn't happen
+        if amountHasSold != configuration[asset]['amountOfHundreds']:
+            return alert.botFailed(asset, 'Unexpected amount of contracts sold: ' + str(amountHasSold))
+    else:
+        amountHasSold = amountToSell
 
     soldOption = {
         'stockSymbol': asset,
         'optionSymbol': new['contract']['symbol'],
         'expiration': new['date'],
-        'count': amountToSell,
+        'count': amountHasSold,
         'strike': new['contract']['strike'],
         'receivedPremium': checkedOrder['price']
     }
@@ -224,11 +235,5 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
     db.insert(soldOption)
 
     db.close()
-
-    if existing:
-        alert.alert(asset, 'Bought back ' + str(amountToBuyBack) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(amountToSell) + 'x ' +
-                    new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
-    else:
-        alert.alert(asset, 'Sold ' + str(amountToSell) + 'x ' + new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
 
     return soldOption

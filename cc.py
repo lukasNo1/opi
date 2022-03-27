@@ -136,7 +136,7 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
     orderPricePercentage = 100 - retry
 
     if retry > maxRetries:
-        return alert.botFailed(asset, 'Order cant be filled, tried with ' + str(orderPricePercentage) + '% of the price.')
+        return alert.botFailed(asset, 'Order cant be filled, tried with ' + str(orderPricePercentage + 1) + '% of the price.')
 
     if existing and existingPremium:
         orderId = api.writeNewContracts(

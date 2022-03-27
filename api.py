@@ -132,7 +132,10 @@ class Api:
        """
 
         if oldSymbol is None:
-            price = newCredit * (fullPricePercentage / 100)
+            price = newCredit
+
+            if fullPricePercentage != 100:
+                price = round(price * (fullPricePercentage / 100), 2)
 
             # init a new position, sell to open
             order = tda.orders.options.option_sell_to_open_limit(newSymbol, newAmount, price) \
@@ -144,10 +147,13 @@ class Api:
 
             if oldAmount != newAmount:
                 # custom order
-                price = -((oldDebit * oldAmount - newCredit * newAmount) * (fullPricePercentage / 100))
+                price = -(oldDebit * oldAmount - newCredit * newAmount)
             else:
                 # diagonal, we ignore amount
-                price = -((oldDebit - newCredit) * (fullPricePercentage / 100))
+                price = -(oldDebit - newCredit)
+
+            if fullPricePercentage != 100:
+                price = round(price * (fullPricePercentage / 100), 2)
 
             order = tda.orders.generic.OrderBuilder()
 

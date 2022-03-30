@@ -25,7 +25,7 @@ try:
             time.sleep(waitTime.total_seconds())
         else:
             if execWindow['openDate']:
-                print('Waiting for last market hour ...')
+                print('Waiting for execution window to open ...')
 
                 delta = execWindow['openDate'] - execWindow['nowDate']
 

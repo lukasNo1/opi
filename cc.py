@@ -196,23 +196,32 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
 
             diagonalAmountBothWays = amountToBuyBack - checkedOrder['partialFills']
 
+            receivedPremium = checkedOrder['price'] * checkedOrder['partialFills']
+
             alert.alert(asset, 'Partial fill: Bought back ' + str(checkedOrder['partialFills']) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(
                 checkedOrder['partialFills']) + 'x ' +
-                        new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
+                        new['contract']['symbol'] + ' for ' + str(receivedPremium))
 
             return writeCc(api, asset, new, existing, existingPremium, diagonalAmountBothWays, diagonalAmountBothWays, retry + 1,
                            partialContractsSold + checkedOrder['partialFills'])
 
         return writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry + 1, partialContractsSold)
 
+    receivedPremium = checkedOrder['price'] * amountToSell
+
     if existing:
+        if amountToBuyBack != amountToSell:
+            # custom order, price is not per contract
+            receivedPremium = checkedOrder['price']
+
         alert.alert(asset, 'Bought back ' + str(amountToBuyBack) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(amountToSell) + 'x ' +
-                    new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
+                    new['contract']['symbol'] + ' for ' + str(receivedPremium))
     else:
-        alert.alert(asset, 'Sold ' + str(amountToSell) + 'x ' + new['contract']['symbol'] + ' for ' + str(checkedOrder['price']))
+        alert.alert(asset, 'Sold ' + str(amountToSell) + 'x ' + new['contract']['symbol'] + ' for ' + str(receivedPremium))
 
     if partialContractsSold > 0:
         amountHasSold = partialContractsSold + amountToSell
+        receivedPremium = receivedPremium + checkedOrder['price'] * partialContractsSold
 
         # shouldn't happen
         if amountHasSold != configuration[asset]['amountOfHundreds']:
@@ -226,7 +235,7 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
         'expiration': new['date'],
         'count': amountHasSold,
         'strike': new['contract']['strike'],
-        'receivedPremium': checkedOrder['price']
+        'receivedPremium': receivedPremium
     }
 
     db = TinyDB(dbName)

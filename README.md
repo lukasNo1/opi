@@ -8,6 +8,13 @@
 
 If you don't understand what's written here or what the code of this bot does, then don't use it!
 
+### Setup instructions
+
+1. Register and create an app on [developer.tdameritrade.com](https://developer.tdameritrade.com/) to get an api key
+2. copy configuration.example.py to configuration.py and adjust it to your needs
+3. Run setupApi.py to get an api token
+4. Run main.py
+
 ## Factsheet
 
 This bot seeks to generate passive income from option premiums through writing covered calls on stocks and ETF's

@@ -20,7 +20,7 @@ try:
             # we don't need to do anything, but we are making a call every day to make sure the refresh token stays valid
             waitTime = support.getDeltaDiffNowTomorrow1Am()
 
-            print('Token refreshed, waiting for roll date ...')
+            print('Token refreshed, waiting for roll date in %s' % rollDate1Am)
 
             time.sleep(waitTime.total_seconds())
         else:

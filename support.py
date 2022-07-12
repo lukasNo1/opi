@@ -62,7 +62,7 @@ def getDeltaDiffNowNextRollDate1Am():
     db.close()
 
     if not soldCalls:
-        return alert.botFailed(None, 'Tried to get expiration dates, but there are no sold calls in the database.')
+        return None
 
     soldCalls = sorted(soldCalls, key=lambda d: d['expiration'])
 

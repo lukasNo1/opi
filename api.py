@@ -140,8 +140,10 @@ class Api:
             # init a new position, sell to open
             order = tda.orders.options.option_sell_to_open_limit(newSymbol, newAmount, price) \
                 .set_duration(tda.orders.common.Duration.DAY) \
-                .set_session(tda.orders.common.Session.NORMAL) \
-                .set_special_instruction(tda.orders.common.SpecialInstruction.ALL_OR_NONE)
+                .set_session(tda.orders.common.Session.NORMAL)
+
+            if newAmount > 1:
+                order.set_special_instruction(tda.orders.common.SpecialInstruction.ALL_OR_NONE)
         else:
             # roll
 

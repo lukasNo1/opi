@@ -134,7 +134,9 @@ class Api:
         if oldSymbol is None:
             price = newCredit
 
-            if fullPricePercentage != 100:
+            if fullPricePercentage == 100:
+                price = round(price, 2)
+            else:
                 price = round(price * (fullPricePercentage / 100), 2)
 
             # init a new position, sell to open
@@ -154,7 +156,9 @@ class Api:
                 # diagonal, we ignore amount
                 price = -(oldDebit - newCredit)
 
-            if fullPricePercentage != 100:
+            if fullPricePercentage == 100:
+                price = round(price, 2)
+            else:
                 price = round(price * (fullPricePercentage / 100), 2)
 
             order = tda.orders.generic.OrderBuilder()

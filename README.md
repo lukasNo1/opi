@@ -88,8 +88,11 @@ Do not use this bot with assets that have low volatility or too few options
 
 **Options** - Covered calls are the least risky options, nonetheless, if you don't know what you're doing or fuck up the configuration above, you can lose a lot or even all of your money
 
-**Selling free contracts** - It should be obvious, but do not set the `allowedPriceReductionPercent` config to 100 as that can result in a 100% price reduction
-which allows the bot to give away the options for free.
+**Early assignment** - If your cc's end up being significantly ITM before expiration, there is a low chance that you get assigned and your brokerage automatically closes the cc's and sells the according amount of shares (Please read about this online if you don't know about it).
 
-### Quick analysis: Is this a drop in replacement for covered call ETFs (like QYLD)?
-If you're interested: [Analysis](misc/qyld_analysis.md)
+If this happens, the bot will fail and notify you, but you will need to manually buy everything back, before restarting the bot.
+
+
+
+### Comparison to covered call ETFs (like QYLD)
+[→ Quick analysis](misc/qyld_analysis.md)

@@ -1,6 +1,6 @@
-# Is this a drop in replacement for covered call ETFs?
+# Can I use this a replacement for covered call ETFs?
 
-Answer: It is a replacement for covered call ETF's yes, but it's not "drop in", like shown below on the example "QYLD".
+Answer: It is a replacement for covered call ETF's yes, but there are some key differences, like shown below on the example "QYLD".
 
 ## Comparison to the QYLD covered call ETF
 
@@ -41,7 +41,7 @@ QYLD buys every single stock in the nasdaq and uses that to cover.
 QYLD distributes the lower of a) half of the premiums received or b) 1% of NAV as dividends. The rest of the received premium is reinvested into the fund.
 
 
-**What if the bot / QYLD doesn't generate any revenue in a month (on the books)?**
+**What if the bot / QYLD doesn't generate any revenue in a month?**
 
 This can be the case if the nasdaq goes up massively, and we would have to sell the new cc's with less premium than the current ones are worth.
 

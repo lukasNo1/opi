@@ -239,5 +239,9 @@ class ApiTestCase(unittest.TestCase):
         ret = apiObj.checkAccountHasEnoughToCover('QQQ', 'QQQ_TESTC400', 2, 2, 400.0, '2222-22-22')
         assert ret == False
 
+        # in case we had an early assignment or an exit after a partial fill
+        # which leaves us with one too few short cc's in the acc (requires manual intervention)
+        self.assertRaises(SystemExit, apiObj.checkAccountHasEnoughToCover, 'QQQ', 'QQQ_TESTC400', 3, 3, 400.0, '2021-11-23')
+
 
 unittest.main()

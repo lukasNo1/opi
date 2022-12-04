@@ -47,14 +47,14 @@ The bot will check if you actually have enough shares or options in the account 
     'minStrike': 0,
 
     # only write that cc if you can get this value or above in premium (per contract)
-    'minYield': 3.00,
+    'minYield': 0.00,
 
     # prevent paying for rollups (can override minGapToATM, minStrike and minYield if ITM!)
     'rollWithoutDebit': True,
 
     # if we can't get filled on an order, how much is the bot allowed to
     # reduce the price from mid price to try and get a fill (percentage 0-100)
-    'allowedPriceReductionPercent': 2
+    'allowedPriceReductionPercent': 50
 
 The bot will inform you about important events either directly in the console or over email.
 

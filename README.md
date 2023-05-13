@@ -82,14 +82,8 @@ If you are running the bot the first time on an asset and there is enough time l
 
 A 'rollup' is the process of rolling to a higher strike price than the current one.
 
-The setting `rollWithoutDebit` is enabled by default.
-
-If you deactivate it, you should have some spare cash in the account to pay for rollup costs, because the new contract can have less premium than the current one,
+If you set `deepITMRollupGap`, you should have some spare cash in the account to pay for rollup costs, because the new contract can have less premium than the current one,
 if the asset price went up.
-
-If `rollWithoutDebit` is enabled, the bot will roll to a contract with the strike being the ATM price + `minGapToATM` (normal behavior).
-
-If that results in debit, it rolls to the highest possible contract with credit instead (current cc strike price as minimum).
 
 ### Risks
 

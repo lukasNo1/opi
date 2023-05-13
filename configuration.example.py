@@ -19,8 +19,8 @@ configuration = {
         'deepITMLimit': 10,
 
         # How much do we want to rollup the strike from last month if we are Deep ITM?
-        # (Set this to 0 if you don't ever wanna pay for rollup)
-        'deepITMMaxRollupGap': 0,
+        # (Set this to 0 if you don't ever wanna pay for rollups)
+        'deepITMRollupGap': 0,
 
         # How much are we allowed to reduce the strike from last month? (flash crash protection)
         # If the underlying f.ex. drops by 30 in value, this is the max we are gonna drop our cc strike

@@ -30,17 +30,22 @@ class Cc:
         # it will get friday most of the time, but if a friday is a holiday f.ex. the chain will only return a thursday date chain
         closestChain = chain[-1]
 
-        minStrike = configuration[asset]['minStrike']
         atmPrice = api.getATMPrice(asset)
         strikePrice = atmPrice + configuration[asset]['minGapToATM']
 
-        if existing and configuration[asset]['rollWithoutDebit']:
-            # prevent paying debit with setting the minYield to the current price of existing
-            minYield = existingPremium
+        minStrike = configuration[asset]['minStrike']
+
+        if existing:
+            maxDrawdownStrike = existing['strike'] - configuration[asset]['maxDrawdownGap']
         else:
-            minYield = configuration[asset]['minYield']
+            maxDrawdownStrike = None
+
+        if maxDrawdownStrike and maxDrawdownStrike > strikePrice:
+            print('Applying max drawdown (' + str(maxDrawdownStrike) + ') ...')
+            strikePrice = maxDrawdownStrike
 
         if minStrike > strikePrice:
+            print('Min strike hit, applying (' + str(minStrike) + ') ...')
             strikePrice = minStrike
 
         #  get the best matching contract
@@ -52,22 +57,31 @@ class Cc:
         # check minYield
         projectedPremium = median([contract['bid'], contract['ask']])
 
-        if projectedPremium < minYield:
-            if existing and configuration[asset]['rollWithoutDebit']:
-                print('Failed to write contract for CREDIT with ATM price + minGapToATM (' + str(strikePrice) + '), now trying to get a lower strike ...')
+        if projectedPremium < existingPremium:
+            if existing:
+                print('Failed to write contract for CREDIT with CC (' + str(contract['strike']) + '), now trying to get a lower strike ...')
 
                 # we need to get a lower strike instead to not pay debit
-                # this works with overwritten minStrike and minYield config settings. the minGapToATM is only used for max price (ATM price + minGapToATM)
-                contract = optionChain.getContractFromDateChainByMinYield(existing['strike'], strikePrice, minYield, closestChain['contracts'])
+                contract = optionChain.getContractFromDateChainByMinYield(existing['strike'], strikePrice, existingPremium, closestChain['contracts'])
 
                 # edge case where this new contract fails: If even a calendar roll wouldn't result in a credit
                 if not contract:
-                    return alert.botFailed(asset, 'minYield not met')
+                    return alert.botFailed(asset, 'couldn\'t find contract for CREDIT above last strike price')
+
+                #  allow to pay for roll up if we are too far itm
+                if configuration[asset]['deepITMRollupGap'] > 0 and self.tooFarItm(contract['strike'], atmPrice):
+                    rollUpStrike = existing['strike'] + configuration[asset]['deepITMRollupGap']
+
+                    # rollUpStrike is possibly still too far itm, but we are not gonna roll up more than this
+                    print('Could roll to ' + str(contract['strike']) + ' for CREDIT, but its too far ITM ...')
+                    print('Rolling to deepITMRollupGap instead (' + str(rollUpStrike) + '), paying debit ...')
+                    contract = optionChain.getContractFromDateChain(rollUpStrike, closestChain['contracts'])
+                    # todo should we check if the account has enough cash to rollup to this contract?
 
                 projectedPremium = median([contract['bid'], contract['ask']])
             else:
-                # the contract we want has not enough premium
-                return alert.botFailed(asset, 'minYield not met')
+                return alert.botFailed(asset, 'Api / code error: No existing contract and projected premium for ' +
+                                       str(strikePrice) + ' is smaller than ' + str(existingPremium))
 
         return {
             'date': closestChain['date'],
@@ -75,6 +89,9 @@ class Cc:
             'contract': contract,
             'projectedPremium': projectedPremium
         }
+
+    def tooFarItm(self, newStrike, atmPrice):
+        return newStrike < atmPrice - configuration[self.asset]['deepITMLimit']
 
     def existing(self):
         db = TinyDB(dbName)
@@ -131,7 +148,7 @@ def needsRolling(cc):
 
 
 def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry=0, partialContractsSold=0):
-    maxRetries = configuration[asset]['allowedPriceReductionPercent']
+    maxRetries = 50
     # lower the price by 1% for each retry if we couldn't get filled
     orderPricePercentage = 100 - retry
 
@@ -163,7 +180,6 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
 
     if retry > 0:
         # go faster through it
-        # todo maybe define a max time for writeCc function, as this can run well past 1 hour with dumb config settings and many assets
         checkFillXTimes = 6
 
     for x in range(checkFillXTimes):

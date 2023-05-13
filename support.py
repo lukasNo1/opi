@@ -1,6 +1,7 @@
 import datetime
 from dateutil.relativedelta import relativedelta
 from tinydb import TinyDB
+from configuration import debugEverythingNeedsRolling
 
 import alert
 from configuration import dbName
@@ -75,5 +76,8 @@ def getDeltaDiffNowNextRollDate1Am():
     expDate = datetime.datetime.strptime(soldCalls[0]['expiration'], '%Y-%m-%d') - datetime.timedelta(days=ccExpDaysOffset) + datetime.timedelta(hours=1)
 
     delta = expDate - now
+
+    if debugEverythingNeedsRolling:
+        return datetime.timedelta(0)
 
     return delta

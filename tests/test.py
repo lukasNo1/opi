@@ -129,9 +129,9 @@ mockConfig = {
         'amountOfHundreds': 1,
         'minGapToATM': 1,
         'minStrike': 0,
-        'minYield': 0,
-        'rollWithoutDebit': True,
-        'allowedPriceReductionPercent': 0
+        'deepITMLimit': 10,
+        'deepITMRollupGap': 0,
+        'maxDrawdownGap': 10
     }
 }
 
@@ -140,9 +140,9 @@ mockConfigTest2 = {
         'amountOfHundreds': 1,
         'minGapToATM': 1,
         'minStrike': 0,
-        'minYield': 0,
-        'rollWithoutDebit': True,
-        'allowedPriceReductionPercent': 0
+        'deepITMLimit': 10,
+        'deepITMRollupGap': 0,
+        'maxDrawdownGap': 10
     }
 }
 
@@ -151,9 +151,9 @@ mockConfigPartialFill = {
         'amountOfHundreds': 2,
         'minGapToATM': 1,
         'minStrike': 0,
-        'minYield': 0,
-        'rollWithoutDebit': True,
-        'allowedPriceReductionPercent': 2
+        'deepITMLimit': 10,
+        'deepITMRollupGap': 0,
+        'maxDrawdownGap': 10
     }
 }
 

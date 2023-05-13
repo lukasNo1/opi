@@ -107,8 +107,8 @@ class Api:
             end = sessionHours['regularMarket'][0]['end']
             end = datetime.datetime.fromisoformat(end)
 
-            # execute after 30 minutes to let volatility settle a bit and prevent exceptions due to api overload
-            windowStart = start + datetime.timedelta(minutes=30)
+            # execute after 10 minutes to let volatility settle a bit and prevent exceptions due to api overload
+            windowStart = start + datetime.timedelta(minutes=10)
 
             if windowStart <= now <= end:
                 return {
@@ -159,7 +159,12 @@ class Api:
             if fullPricePercentage == 100:
                 price = round(price, 2)
             else:
-                price = round(price * (fullPricePercentage / 100), 2)
+                if price < 100:
+                    # reduce the price by 1$ for each retry, to have better fills and allow it to go below 0
+                    price = round(price - ((100 - fullPricePercentage) * 0.01), 2)
+                else:
+                    # reduce the price by 1% for each retry
+                    price = round(price * (fullPricePercentage / 100), 2)
 
             order = tda.orders.generic.OrderBuilder()
 

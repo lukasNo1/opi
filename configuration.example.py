@@ -12,21 +12,22 @@ configuration = {
         # how many cc's to write
         'amountOfHundreds': 1,
 
-        # only write cc's at or over current asset price + this value
+        # write cc's at or over current asset price + this value
         'minGapToATM': 1,
 
-        # don't write cc's with strikes below this value
-        'minStrike': 0,
+        # If our strike is below current asset price - this value, we consider it deep ITM and want to rollup for debit
+        'deepITMLimit': 10,
 
-        # only write that cc if you can get this value or above in premium (per contract)
-        'minYield': 0.00,
+        # How much do we want to rollup the strike from last month if we are Deep ITM?
+        # (Set this to 0 if you don't ever wanna pay for rollup)
+        'deepITMMaxRollupGap': 0,
 
-        # prevent paying for rollups (can override minGapToATM, minStrike and minYield!)
-        'rollWithoutDebit': True,
+        # How much are we allowed to reduce the strike from last month? (flash crash protection)
+        # If the underlying f.ex. drops by 30 in value, this is the max we are gonna drop our cc strike
+        'maxDrawdownGap': 10,
 
-        # if we can't get filled on an order, how much is the bot allowed to
-        # reduce the price from mid price to try and get a fill (percentage 0-100)
-        'allowedPriceReductionPercent': 50
+        # don't write cc's with strikes below this value (set this f.ex. to breakeven)
+        'minStrike': 0
     }
 }
 

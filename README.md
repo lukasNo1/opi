@@ -1,12 +1,18 @@
 # OPI - Option passive income bot
 
+The DIY alternative to covered call ETF's
+
+This bot is meant for my own personal use, the strategy behind it is subject to change.
+
+That said, you are free to use this bot in any way you see fit, as long as you understand what's written here and what the code of this bot does.
+
+If you don't understand everything 100%, then don't use it!
+
 ### Requirements
 
 - A TD Ameritrade account with options privileges
 - All python packages from requirements.txt installed
 - General understanding of the stock market and options
-
-If you don't understand what's written here or what the code of this bot does, then don't use it!
 
 ### Setup instructions
 
@@ -25,6 +31,10 @@ The covered call will be the first OTM call per default (current asset price + 1
 
 The bot buys back (rolls) the option contract each month, one day before expiration
 
+The bot will try to roll contracts for credit first, but can fall back to pay for rollups if the last sold option ended up deep ITM
+
+(Paying for rollups can be prevented in the config settings)
+
 ---
 
 You need to own at least 100 of the underlying asset you want the bot to sell the covered calls on
@@ -40,21 +50,22 @@ The bot will check if you actually have enough shares or options in the account 
     # how many cc's to write
     'amountOfHundreds': 1,
 
-    # only write cc's at or over current asset price + this value
+    # write cc's at or over current asset price + this value
     'minGapToATM': 1,
 
-    # don't write cc's with strikes below this value
-    'minStrike': 0,
+    # If our strike is below current asset price - this value, we consider it deep ITM and want to rollup for debit
+    'deepITMLimit': 10,
 
-    # only write that cc if you can get this value or above in premium (per contract)
-    'minYield': 0.00,
+    # How much do we want to rollup the strike from last month if we are Deep ITM?
+    # (Set this to 0 if you don't ever wanna pay for rollup)
+    'deepITMMaxRollupGap': 0,
 
-    # prevent paying for rollups (can override minGapToATM, minStrike and minYield if ITM!)
-    'rollWithoutDebit': True,
+    # How much are we allowed to reduce the strike from last month? (flash crash protection)
+    # If the underlying f.ex. drops by 30 in value, this is the max we are gonna drop our cc strike
+    'maxDrawdownGap': 10,
 
-    # if we can't get filled on an order, how much is the bot allowed to
-    # reduce the price from mid price to try and get a fill (percentage 0-100)
-    'allowedPriceReductionPercent': 50
+    # don't write cc's with strikes below this value (set this f.ex. to breakeven)
+    'minStrike': 0
 
 The bot will inform you about important events either directly in the console or over email.
 
@@ -86,13 +97,10 @@ If that results in debit, it rolls to the highest possible contract with credit 
 
 Do not use this bot with assets that have low volatility or too few options
 
-**Options** - Covered calls are the least risky options, nonetheless, if you don't know what you're doing or fuck up the configuration above, you can lose a lot or even all of your money
+**Options** - Covered calls are the least risky options, nonetheless, if you don't know what you're doing or fuck up the configuration above, you can lose a lot or even all of your
+money
 
-**Early assignment** - If your cc's end up being significantly ITM before expiration, there is a low chance that you get assigned and your brokerage automatically closes the cc's and sells the according amount of shares (Please read about this online if you don't know about it).
+**Early assignment** - If your cc's end up being significantly ITM before expiration, there is a low chance that you get assigned and your brokerage automatically closes the cc's
+and sells the according amount of shares.
 
 If this happens, the bot will fail and notify you, but you will need to manually buy everything back, before restarting the bot.
-
-
-
-### Comparison to covered call ETFs (like QYLD)
-[→ Quick analysis](misc/qyld_analysis.md)

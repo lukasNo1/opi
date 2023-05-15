@@ -72,11 +72,12 @@ class Cc:
                 if configuration[asset]['deepITMRollupGap'] > 0 and self.tooFarItm(contract['strike'], atmPrice):
                     rollUpStrike = existing['strike'] + configuration[asset]['deepITMRollupGap']
 
-                    # rollUpStrike is possibly still too far itm, but we are not gonna roll up more than this
-                    print('Could roll to ' + str(contract['strike']) + ' for CREDIT, but its too far ITM ...')
-                    print('Rolling to deepITMRollupGap instead (' + str(rollUpStrike) + '), paying debit ...')
-                    contract = optionChain.getContractFromDateChain(rollUpStrike, closestChain['contracts'])
-                    # todo should we check if the account has enough cash to rollup to this contract?
+                    if rollUpStrike > contract['strike']:
+                        # rollUpStrike is possibly still too far itm, but we are not gonna roll up more than this
+                        print('Could roll to ' + str(contract['strike']) + ' for CREDIT, but its too far ITM ...')
+                        print('Rolling to deepITMRollupGap instead (' + str(rollUpStrike) + '), paying debit ...')
+                        contract = optionChain.getContractFromDateChain(rollUpStrike, closestChain['contracts'])
+                        # todo should we check if the account has enough cash to rollup to this contract?
 
                 projectedPremium = median([contract['bid'], contract['ask']])
             else:

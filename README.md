@@ -57,8 +57,8 @@ The bot will check if you actually have enough shares or options in the account 
     'deepITMLimit': 10,
 
     # How much do we want to rollup the strike from last month if we are Deep ITM?
-    # (Set this to 0 if you don't ever wanna pay for rollups)
-    'deepITMRollupGap': 0,
+    # (If this is set to 0 the bot will roll to the highest contract with credit, ignoring deepITMLimit)
+    'maxRollupGap': 0,
 
     # How much are we allowed to reduce the strike from last month? (flash crash protection)
     # If the underlying f.ex. drops by 30 in value, this is the max we are gonna drop our cc strike
@@ -82,7 +82,7 @@ If you are running the bot the first time on an asset and there is enough time l
 
 A 'rollup' is the process of rolling to a higher strike price than the current one.
 
-If you set `deepITMRollupGap`, you should have some spare cash in the account to pay for rollup costs, because the new contract can have less premium than the current one,
+If you set `maxRollupGap`, you should have some spare cash in the account to pay for rollup costs, because the new contract can have less premium than the current one,
 if the asset price went up.
 
 ### Risks

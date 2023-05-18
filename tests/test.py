@@ -130,7 +130,7 @@ mockConfig = {
         'minGapToATM': 1,
         'minStrike': 0,
         'deepITMLimit': 10,
-        'deepITMRollupGap': 0,
+        'maxRollupGap': 0,
         'maxDrawdownGap': 10
     }
 }
@@ -141,7 +141,7 @@ mockConfigTest2 = {
         'minGapToATM': 1,
         'minStrike': 0,
         'deepITMLimit': 10,
-        'deepITMRollupGap': 0,
+        'maxRollupGap': 0,
         'maxDrawdownGap': 10
     }
 }
@@ -152,7 +152,7 @@ mockConfigPartialFill = {
         'minGapToATM': 1,
         'minStrike': 0,
         'deepITMLimit': 10,
-        'deepITMRollupGap': 0,
+        'maxRollupGap': 0,
         'maxDrawdownGap': 10
     }
 }

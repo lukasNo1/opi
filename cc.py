@@ -68,14 +68,18 @@ class Cc:
                 if not contract:
                     return alert.botFailed(asset, 'couldn\'t find contract for CREDIT above last strike price')
 
+                deepItmLimitStrike = atmPrice - configuration[asset]['deepITMLimit']
+
                 #  allow to pay for roll up if we are too far itm
-                if configuration[asset]['deepITMRollupGap'] > 0 and self.tooFarItm(contract['strike'], atmPrice):
-                    rollUpStrike = existing['strike'] + configuration[asset]['deepITMRollupGap']
+                if configuration[asset]['maxRollupGap'] > 0 and contract['strike'] < deepItmLimitStrike:
+                    maxRollupGapStrike = existing['strike'] + configuration[asset]['maxRollupGap']
+
+                    # rollup to deepITMLimit, with a max jump of maxRollupGap per month
+                    rollUpStrike = maxRollupGapStrike if maxRollupGapStrike < deepItmLimitStrike else deepItmLimitStrike
 
                     if rollUpStrike > contract['strike']:
-                        # rollUpStrike is possibly still too far itm, but we are not gonna roll up more than this
                         print('Could roll to ' + str(contract['strike']) + ' for CREDIT, but its too far ITM ...')
-                        print('Rolling to deepITMRollupGap instead (' + str(rollUpStrike) + '), paying debit ...')
+                        print('Rolling towards deepITMLimit instead with this contract: ' + str(rollUpStrike) + '), paying debit ...')
                         contract = optionChain.getContractFromDateChain(rollUpStrike, closestChain['contracts'])
                         # todo should we check if the account has enough cash to rollup to this contract?
 
@@ -90,9 +94,6 @@ class Cc:
             'contract': contract,
             'projectedPremium': projectedPremium
         }
-
-    def tooFarItm(self, newStrike, atmPrice):
-        return newStrike < atmPrice - configuration[self.asset]['deepITMLimit']
 
     def existing(self):
         db = TinyDB(dbName)

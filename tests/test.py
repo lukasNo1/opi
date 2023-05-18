@@ -40,8 +40,10 @@ class MockApi:
         return {
             'filled': True,
             'price': 1337,
+            'typeAdjustedPrice': 1337,
             'partialFills': 0,
-            'complexOrderStrategyType': None
+            'complexOrderStrategyType': None,
+            'orderType': 'CREDIT'
         }
 
     def cancelOrder(self, orderId):
@@ -71,15 +73,19 @@ class MockApiPartialFill(MockApi):
             return {
                 'filled': True,
                 'price': 1337,
+                'typeAdjustedPrice': 1337,
                 'partialFills': 0,
-                'complexOrderStrategyType': 'DIAGONAL'
+                'complexOrderStrategyType': 'DIAGONAL',
+                'orderType': 'CREDIT'
             }
         else:
             return {
                 'filled': False,
                 'price': 1337,
+                'typeAdjustedPrice': 1337,
                 'partialFills': 1,
-                'complexOrderStrategyType': 'DIAGONAL'
+                'complexOrderStrategyType': 'DIAGONAL',
+                'orderType': 'CREDIT'
             }
 
     def cancelOrder(self, orderId):

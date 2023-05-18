@@ -205,6 +205,12 @@ class Api:
             filled = data['status'] == 'FILLED'
             price = data['price']
             partialFills = data['filledQuantity']
+            orderType = 'CREDIT'
+            typeAdjustedPrice = price
+
+            if data['orderType'] == 'NET_DEBIT':
+                orderType = 'DEBIT'
+                typeAdjustedPrice = -price
 
             if 'complexOrderStrategyType' in data:
                 complexOrderStrategyType = data['complexOrderStrategyType']
@@ -216,7 +222,9 @@ class Api:
             'filled': filled,
             'price': price,
             'partialFills': partialFills,
-            'complexOrderStrategyType': complexOrderStrategyType
+            'complexOrderStrategyType': complexOrderStrategyType,
+            'typeAdjustedPrice': typeAdjustedPrice,
+            'orderType': orderType
         }
 
     def cancelOrder(self, orderId):

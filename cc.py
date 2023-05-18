@@ -79,7 +79,7 @@ class Cc:
 
                     if rollUpStrike > contract['strike']:
                         print('Could roll to ' + str(contract['strike']) + ' for CREDIT, but its too far ITM ...')
-                        print('Rolling towards deepITMLimit instead with this contract: ' + str(rollUpStrike) + '), paying debit ...')
+                        print('Rolling towards deepITMLimit instead with this contract: ' + str(rollUpStrike) + ', paying debit ...')
                         contract = optionChain.getContractFromDateChain(rollUpStrike, closestChain['contracts'])
                         # todo should we check if the account has enough cash to rollup to this contract?
 
@@ -214,7 +214,7 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
 
             diagonalAmountBothWays = amountToBuyBack - checkedOrder['partialFills']
 
-            receivedPremium = checkedOrder['price'] * checkedOrder['partialFills']
+            receivedPremium = checkedOrder['typeAdjustedPrice'] * checkedOrder['partialFills']
 
             alert.alert(asset, 'Partial fill: Bought back ' + str(checkedOrder['partialFills']) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(
                 checkedOrder['partialFills']) + 'x ' +
@@ -225,12 +225,12 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
 
         return writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry + 1, partialContractsSold)
 
-    receivedPremium = checkedOrder['price'] * amountToSell
+    receivedPremium = checkedOrder['typeAdjustedPrice'] * amountToSell
 
     if existing:
         if amountToBuyBack != amountToSell:
             # custom order, price is not per contract
-            receivedPremium = checkedOrder['price']
+            receivedPremium = checkedOrder['typeAdjustedPrice']
 
         alert.alert(asset, 'Bought back ' + str(amountToBuyBack) + 'x ' + existing['optionSymbol'] + ' and sold ' + str(amountToSell) + 'x ' +
                     new['contract']['symbol'] + ' for ' + str(receivedPremium))
@@ -239,7 +239,7 @@ def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountT
 
     if partialContractsSold > 0:
         amountHasSold = partialContractsSold + amountToSell
-        receivedPremium = receivedPremium + checkedOrder['price'] * partialContractsSold
+        receivedPremium = receivedPremium + checkedOrder['typeAdjustedPrice'] * partialContractsSold
 
         # shouldn't happen
         if amountHasSold != configuration[asset]['amountOfHundreds']:

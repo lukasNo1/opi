@@ -64,7 +64,10 @@ class Cc:
                 # we need to get a lower strike instead to not pay debit
                 contract = optionChain.getContractFromDateChainByMinYield(existing['strike'], strikePrice, existingPremium, closestChain['contracts'])
 
-                # edge case where this new contract fails: If even a calendar roll wouldn't result in a credit
+                # edge case where this new contract fails:
+                # - If even a calendar roll wouldn't result in a credit
+                # - If we have a 301 f.ex. but the new chain only has 300 or 305 with less premium than the 301
+                #   to prevent failing, we could f.ex. check maxRollupGap, ignoring deepITMLimit and if we can rollup for debit, then do that instead of failing
                 if not contract:
                     return alert.botFailed(asset, 'couldn\'t find contract for CREDIT above last strike price')
 
@@ -150,7 +153,7 @@ def needsRolling(cc):
 
 
 def writeCc(api, asset, new, existing, existingPremium, amountToBuyBack, amountToSell, retry=0, partialContractsSold=0):
-    maxRetries = 50
+    maxRetries = 75
     # lower the price by 1% for each retry if we couldn't get filled
     orderPricePercentage = 100 - retry
 
